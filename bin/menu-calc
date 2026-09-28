@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Calculator in the Omarchy menu look: type an expression, Enter shows the
+# result in the prompt and copies it. Keep typing to chain; Esc or an empty
+# Enter closes it.
+
+set -uo pipefail
+
+if ! command -v qalc >/dev/null; then
+  notify-send "Calculator" "qalc not found. Run: omarchy pkg add libqalculate"
+  exit 1
+fi
+
+# Decimal comma: "2,5" and "2.5" both parse, results come back as "2,5".
+calc() {
+  local expr
+  # qalc does not understand "15% of 3400"; accept "of"/"de" as multiplication.
+  expr=$(sed -E 's/%[[:space:]]*(of|de)[[:space:]]+/% * /g' <<<"$1")
+  qalc -s "decimal comma on" "$expr" 2>&1
+}
+
+prompt="Calculate"
+
+while expr=$(omarchy-menu-input "$prompt" --width 420) && [[ -n ${expr//[[:space:]]/} ]]; do
+  output=$(calc "$expr")
+
+  # qalc drops invalid parts with a warning and still prints a number; reject those.
+  if grep -qiE '^(warning|error):' <<<"$output"; then
+    prompt="Could not evaluate: $expr"
+    continue
+  fi
+
+  # Non-terse output is "expression = result"; keep what follows the last " = ".
+  result=$(tail -n 1 <<<"$output")
+  result=${result##* = }
+  result=${result##* ≈ }
+  # Plain hyphen so negatives paste as numbers into spreadsheets.
+  result=${result//−/-}
+
+  if [[ -z $result ]]; then
+    prompt="Could not evaluate: $expr"
+    continue
+  fi
+
+  printf '%s' "$result" | wl-copy
+  prompt="$expr = $result  (copied)"
+done

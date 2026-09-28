@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+json_escape() {
+  jq -Rn --arg v "$1" '$v'
+}
+
+normalize_percent() {
+  local raw="${1:-}"
+  raw="${raw//[$'\t\r\n %']/}"
+  [[ "$raw" =~ ^[0-9]+$ ]] || return 1
+  if (( raw >= 0 && raw <= 100 )); then
+    printf '%s\n' "$raw"
+    return 0
+  fi
+  return 1
+}
+
+kind_for_name() {
+  local name_lc="${1,,}"
+  case "$name_lc" in
+    *mouse*|*attack*shark*|*x11*|*razer*|*logitech*|*steelseries*|*zowie*) printf 'mouse' ;;
+    *headphone*|*headset*|*earbud*|*buds*|*fone*|*pixun*|*picun*|*g2*|*airpods*|*wh-1000*|*wf-1000*|*soundcore*|*jbl*|*qcy*) printf 'headset' ;;
+    *keyboard*) printf 'keyboard' ;;
+    *) printf 'device' ;;
+  esac
+}
+
+short_for_kind() {
+  case "$1" in
+    mouse) printf 'MS' ;;
+    headset) printf 'HP' ;;
+    keyboard) printf 'KB' ;;
+    *) printf 'BT' ;;
+  esac
+}
+
+items=()
+seen_keys="|"
+
+add_item() {
+  local key="$1"
+  local name="$2"
+  local pct="$3"
+  local kind="${4:-}"
+  local source="${5:-}"
+
+  pct="$(normalize_percent "$pct" || true)"
+  [[ -n "$pct" ]] || return 0
+  [[ "$seen_keys" != *"|$key|"* ]] || return 0
+  seen_keys+="$key|"
+
+  [[ -n "$kind" ]] || kind="$(kind_for_name "$name")"
+  local short
+  short="$(short_for_kind "$kind")"
+
+  items+=("$(jq -cn \
+    --arg key "$key" \
+    --arg name "$name" \
+    --arg kind "$kind" \
+    --arg short "$short" \
+    --arg source "$source" \
+    --argjson percentage "$pct" \
+    '{key:$key,name:$name,kind:$kind,short:$short,percentage:$percentage,source:$source}')")
+}
+
+if command -v upower >/dev/null 2>&1; then
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    [[ "$path" != *"/battery_BAT"* ]] || continue
+    info="$(upower -i "$path" 2>/dev/null || true)"
+    [[ -n "$info" ]] || continue
+    percentage="$(awk -F: '/percentage:/ { gsub(/[ \t%]/, "", $2); print $2; exit }' <<<"$info")"
+    [[ -n "$percentage" ]] || continue
+    model="$(awk -F: '/model:/ { sub(/^[ \t]+/, "", $2); print $2; exit }' <<<"$info")"
+    native="$(awk -F: '/native-path:/ { sub(/^[ \t]+/, "", $2); print $2; exit }' <<<"$info")"
+    type="$(awk -F: '/type:/ { sub(/^[ \t]+/, "", $2); print $2; exit }' <<<"$info")"
+    name="${model:-${native:-$(basename "$path")}}"
+    kind="$(kind_for_name "$name $type $path")"
+    add_item "upower:$path" "$name" "$percentage" "$kind" "upower"
+  done < <(upower -e 2>/dev/null | grep -E '/(mouse|keyboard|headset|headphones|gaming_input|bluetooth|hidpp)' || true)
+fi
+
+if command -v bluetoothctl >/dev/null 2>&1; then
+  while IFS= read -r line; do
+    [[ "$line" =~ ^Device[[:space:]]+([0-9A-Fa-f:]+)[[:space:]]+(.+)$ ]] || continue
+    mac="${BASH_REMATCH[1]}"
+    name="${BASH_REMATCH[2]}"
+    info="$(bluetoothctl info "$mac" 2>/dev/null || true)"
+    grep -qi 'Connected: yes' <<<"$info" || continue
+    percentage="$(awk -F '[()]' '/Battery Percentage:/ { print $2; exit }' <<<"$info" | tr -cd '0-9')"
+    if [[ -z "$percentage" ]]; then
+      percentage="$(awk -F: '/Battery Percentage:/ { gsub(/[^0-9]/, "", $2); print $2; exit }' <<<"$info")"
+    fi
+    [[ -n "$percentage" ]] || continue
+    kind="$(kind_for_name "$name")"
+    add_item "bt:$mac" "$name" "$percentage" "$kind" "bluetoothctl"
+  done < <(bluetoothctl devices Connected 2>/dev/null || true)
+fi
+
+mouse_helper="$(dirname "$0")/attack-shark-battery"
+mouse_cache="${XDG_CACHE_HOME:-$HOME/.cache}/opensharkx11/battery"
+if [[ -f "$mouse_cache" ]]; then
+  cache_age=$(( $(date +%s) - $(stat -c %Y "$mouse_cache" 2>/dev/null || echo 0) ))
+  if (( cache_age <= 900 )); then
+    mouse_pct="$(head -n1 "$mouse_cache" 2>/dev/null | tr -cd '0-9')"
+    if [[ -n "$mouse_pct" ]]; then
+      add_item "attack-shark-x11" "Attack Shark X11" "$mouse_pct" "mouse" "opensharkx11-cache"
+    fi
+  fi
+fi
+if [[ -x "$mouse_helper" ]]; then
+  mouse_pct="$("$mouse_helper" 2>/dev/null || true)"
+  if [[ -n "$mouse_pct" ]]; then
+    add_item "attack-shark-x11" "Attack Shark X11" "$mouse_pct" "mouse" "libusb"
+  fi
+fi
+
+if ((${#items[@]} == 0)); then
+  printf '{"ok":true,"label":"","tooltip":"No peripheral battery data","items":[]}\n'
+  exit 0
+fi
+
+items_json="$(printf '%s\n' "${items[@]}" | jq -s '.')"
+label="$(jq -r 'map(.short + " " + (.percentage|tostring) + "%") | join("  ")' <<<"$items_json")"
+tooltip="$(jq -r 'map(.name + ": " + (.percentage|tostring) + "%") | join("\n")' <<<"$items_json")"
+
+jq -cn \
+  --arg label "$label" \
+  --arg tooltip "$tooltip" \
+  --argjson items "$items_json" \
+  '{ok:true,label:$label,tooltip:$tooltip,items:$items}'

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "vini.dock",
+  "name": "Dock",
+  "version": "1.0.0",
+  "author": "viniabdalla",
+  "description": "Bottom Omarchy shell dock with pinned application launchers",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}

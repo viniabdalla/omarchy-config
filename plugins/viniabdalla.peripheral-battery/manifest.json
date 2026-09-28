@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "viniabdalla.peripheral-battery",
+  "name": "Peripheral Battery",
+  "version": "0.1.0",
+  "author": "viniabdalla",
+  "description": "Shows battery percentage for connected headphones, mice, and other peripherals.",
+  "license": "MIT",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Peripheral Battery",
+    "description": "Battery percentages for connected peripherals",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

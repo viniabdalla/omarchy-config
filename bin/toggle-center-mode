@@ -1,0 +1,23 @@
+#!/bin/bash
+# Toggle the "center" layout on the current workspace; restore the previous one.
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/center-mode"
+ws=$(hyprctl activeworkspace -j | jq -r '.id')
+[[ $ws =~ ^-?[0-9]+$ ]] || exit 1
+cur=$(hyprctl activeworkspace -j | jq -r '.tiledLayout')
+prev_file="$STATE/$ws.prev"
+
+set_layout() {
+  hyprctl eval "hl.workspace_rule({ workspace = \"$ws\", layout = \"$1\" })" >/dev/null
+}
+
+if [[ $cur == lua:center || $cur == center ]]; then
+  prev=$(cat "$prev_file" 2>/dev/null)
+  set_layout "${prev:-dwindle}"
+  rm -f "$prev_file"
+  rm -f "$STATE/hub"; rmdir "$STATE" 2>/dev/null
+else
+  mkdir -p "$STATE"
+  echo "$cur" >"$prev_file"
+  hyprctl activewindow -j | jq -r '.address // empty' >"$STATE/hub"
+  set_layout lua:center
+fi

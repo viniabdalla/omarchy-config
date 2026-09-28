@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.silkvain.dockseid",
+  "name": "Dockseid",
+  "version": "2.0.0",
+  "author": "Silkvain",
+  "license": "MIT",
+  "description": "A macOS-style pill dock for Omarchy: pinned and running apps grouped per app, glass and blur effects, icon magnification, and a look that follows your Omarchy theme with per-colour overrides.",
+  "kinds": ["panel", "bar-widget"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "panel": "Dock.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Dockseid settings",
+    "description": "Opens Dockseid settings",
+    "category": "Compositor",
+    "allowMultiple": false
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "viniabdalla.agenda",
+  "name": "Agenda",
+  "version": "0.4.0",
+  "author": "Vinicius Abdalla",
+  "license": "MIT",
+  "description": "Tarefas e compromissos do Google na barra do Omarchy: a tarefa atual no pill, o dia inteiro no painel.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Agenda",
+    "description": "Um pill com a tarefa AGORA e um painel com as tarefas e compromissos de hoje, sincronizados com Google Calendar e Google Tasks.",
+    "category": "Productivity",
+    "aliases": [
+      "agenda",
+      "todo",
+      "tarefas"
+    ],
+    "allowMultiple": false,
+    "defaults": {
+      "maxPillChars": 34,
+      "showEvents": true,
+      "hideCompleted": false
+    },
+    "schema": [
+      {
+        "key": "maxPillChars",
+        "type": "integer",
+        "label": "Largura do pill (caracteres)",
+        "min": 12,
+        "max": 80,
+        "step": 2,
+        "defaultValue": 34
+      },
+      {
+        "key": "showEvents",
+        "type": "boolean",
+        "label": "Mostrar compromissos do Calendar",
+        "defaultValue": true
+      },
+      {
+        "key": "hideCompleted",
+        "type": "boolean",
+        "label": "Ocultar tarefas concluidas",
+        "defaultValue": false
+      }
+    ]
+  }
+}

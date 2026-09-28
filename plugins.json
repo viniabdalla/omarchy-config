@@ -1,0 +1,62 @@
+{
+  "format": "omarchy-config-plugins",
+  "version": 1,
+  "plugins": [
+    {
+      "id": "alanfortlink.camera-effects",
+      "name": "Camera Effects",
+      "version": "0.4.0",
+      "commit": "ab4f1586ed49418d3305aab66dc08160c64f0f72",
+      "source": "https://github.com/alanfortlink/camera-effects.git"
+    },
+    {
+      "id": "bobbynicholas.omaland",
+      "name": "Omaland",
+      "version": "1.0.0",
+      "commit": "ec232b6aa2e31b2f089ad89b653cd706989865b9",
+      "source": "https://github.com/bobby-nicholas/omaland.git"
+    },
+    {
+      "id": "crmne.hyprmoncfg",
+      "name": "hyprmoncfg: Multi-Monitor Manager for Omarchy",
+      "version": "2.2.1",
+      "commit": "39ff6efd4d535f064867d873d6f0ce299c5e1374",
+      "source": "https://github.com/crmne/omarchy-hyprmoncfg.git"
+    },
+    {
+      "id": "io.github.andyweiboan.missioncontrol",
+      "name": "Mission Control",
+      "version": "1.1.0",
+      "commit": "cacdc551ec898f91f01d59d4923e913a94a10d79",
+      "source": "https://github.com/AndyWeiBoan/omarchy-mission-control.git"
+    },
+    {
+      "id": "io.github.jordanneenan.simple-power-menu",
+      "name": "Simple Power Menu",
+      "version": "1.2.0",
+      "commit": "3bb61f633529cbc7544bbe1a7ec05615d412c876",
+      "source": "https://github.com/jordanneenan/simple-power-menu.git"
+    },
+    {
+      "id": "rosakodu.dock",
+      "name": "Dock",
+      "version": "1.8.8",
+      "commit": "a469e287c38737d672f81b37cdc6036c219fdf3c",
+      "source": "https://github.com/rosakodu/omarchy-dock.git"
+    },
+    {
+      "id": "ryenski.taildrop",
+      "name": "Taildrop",
+      "version": "1.0.1",
+      "commit": "34b2b182cd1152473c9c9aaff45a4c2728fcefd0",
+      "source": "https://github.com/ryenski/omarchy-taildrop.git"
+    },
+    {
+      "id": "stappmus.activity-monitor",
+      "name": "Activity Monitor",
+      "version": "2.1.1",
+      "commit": "b25a98c7ff2a688ab74d86d2be42249e2db2f9cf",
+      "source": "https://github.com/stappmus/omarchy-activity-monitor.git"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "idle": {
+    "screensaver": 600,
+    "lock": 900
+  },
+  "bar": {
+    "position": "top",
+    "transparent": true,
+    "centerAnchor": "omarchy.clock",
+    "layout": {
+      "left": [
+        {
+          "id": "viniabdalla.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "viniabdalla.agenda"
+        }
+      ],
+      "center": [
+        {
+          "id": "viniabdalla.indicators"
+        },
+        {
+          "id": "omarchy.clock",
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "mission_control_button",
+          "type": "qml"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "gladimdim.config-sync"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "right": [
+        {
+          "id": "viniabdalla.agents"
+        },
+        {
+          "id": "stappmus.activity-monitor",
+          "openExpanded": true
+        },
+        {
+          "id": "omarchy.tailscale"
+        },
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "alanfortlink.camera-effects"
+        },
+        {
+          "id": "gaming-cursor",
+          "type": "qml"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "crmne.hyprmoncfg"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        },
+        {
+          "id": "io.github.jordanneenan.simple-power-menu"
+        }
+      ]
+    }
+  },
+  "plugins": [
+    {
+      "id": "bobbynicholas.omaland"
+    },
+    {
+      "id": "ryenski.taildrop"
+    },
+    {
+      "id": "io.github.andyweiboan.missioncontrol"
+    },
+    {
+      "id": "io.github.silkvain.dockseid"
+    }
+  ],
+  "disabledPlugins": [
+    "omarchy.menu"
+  ],
+  "cloneSourceRestores": [
+    "viniabdalla.menu"
+  ]
+}
