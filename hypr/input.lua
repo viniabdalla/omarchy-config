@@ -50,8 +50,8 @@
 
 -- Enable touchpad gestures for changing workspaces.
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Gestures/
-hl.gesture({ fingers = 4, direction = "left", action = function() hl.dispatch(hl.dsp.focus({ workspace = "r+1" })) end })
-hl.gesture({ fingers = 4, direction = "right", action = function() hl.dispatch(hl.dsp.focus({ workspace = "r-1" })) end })
+-- hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+hl.gesture({ fingers = 4, direction = "horizontal", action = "workspace" })
 
 -- Enable touchpad gestures for moving focus (helpful on scrolling layout).
 -- hl.gesture({ fingers = 3, direction = "left", action = function() hl.dispatch(hl.dsp.focus({ direction = "l" })) end })
@@ -59,16 +59,7 @@ hl.gesture({ fingers = 4, direction = "right", action = function() hl.dispatch(h
 
 -- Personal touchpad behavior.
 hl.config({
-  gestures = {
-    workspace_swipe_distance = 180,
-    workspace_swipe_cancel_ratio = 0.25,
-    workspace_swipe_min_speed_to_force = 10,
-    workspace_swipe_create_new = true,
-    workspace_swipe_use_r = true,
-  },
-
   input = {
-    natural_scroll = false,
     kb_options = "",
     sensitivity = 0.35,
     touchpad = {
@@ -76,12 +67,4 @@ hl.config({
       drag_3fg = 1,
     },
   },
-})
-
--- Hyprland exposes this Bluetooth trackpad as a mouse, so invert only this
--- device without changing normal mouse wheel direction.
-hl.device({
-  name = "function-trackpad-mouse",
-  natural_scroll = true,
-  drag_3fg = 1,
 })

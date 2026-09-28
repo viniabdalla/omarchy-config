@@ -311,7 +311,6 @@ Panel {
   }
 
   function barProviderIconName(id) {
-    if (id === "claude") return "claude-bar"
     return String(id || "")
   }
 

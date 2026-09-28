@@ -57,16 +57,18 @@ hl.config({
   },
 })
 
--- >>> omaland managed block >>>
--- Written by Omaland. Safe to hand-edit: Omaland re-reads this block
+-- >>> lacquer managed block >>>
+-- Written by Lacquer. Safe to hand-edit: Lacquer re-reads this block
 -- every time it opens, and only ever rewrites what's between the fences.
 hl.config({
-  animations = {
-    workspace_wraparound = true,
+  cursor = {
+    hide_on_key_press = false,
+    inactive_timeout = 0,
   },
 
   decoration = {
     rounding = 0,
+    rounding_power = 2,
 
     blur = {
       enabled = false,
@@ -74,19 +76,19 @@ hl.config({
 
     glow = {
       enabled = false,
-      range = 10,
-      render_power = 3,
+      range = 12,
     },
 
     shadow = {
       enabled = false,
+      range = 20,
       sharp = false,
     },
   },
 
   general = {
-    border_size = 2,
-    gaps_out = 0,
+    border_size = 1,
+    gaps_out = 2,
     gaps_workspaces = 0,
     layout = "dwindle",
 
@@ -95,4 +97,6 @@ hl.config({
     },
   },
 })
--- <<< omaland managed block <<<
+
+hl.animation({ leaf = "borderangle", enabled = false })
+-- <<< lacquer managed block <<<

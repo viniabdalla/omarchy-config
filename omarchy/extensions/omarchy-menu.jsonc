@@ -27,4 +27,7 @@
   // Example: replace the default About action by reusing the same id. Existing
   // fields are kept unless overridden.
   // "about": {"icon":"","label":"About","action":"omarchy-launch-or-focus-tui \"zsh -c 'fastfetch; read -k 1'\""},
+
+  "apps.artemis": {"label":"Artemis (Faturas Trópico Solar)","action":"uwsm-app -- /home/viniabdalla/Projects/gitprojects/ARTEMIS-CLAUDE/artemis/run_artemis.sh"},
+  "apps.oracle": {"label":"Oracle 3.1 (Proposta Comercial Solar)","action":"uwsm-app -- bash -c \"'/home/viniabdalla/Projects/gitprojects/oracle/OneDrive/CLAUDE CLI/NOVA PROPOSTA COMERCIAL SOLAR/oracle_app 2.2/scripts/launch_webapp.sh'\""}
 }

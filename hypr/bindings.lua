@@ -13,3 +13,7 @@ o.bind("SUPER + SHIFT + T", "Send via Taildrop", "omarchy-shell shell toggle rye
 o.bind("SUPER + SHIFT + Y", "ShelfClip paste", "shelfclip paste")
 o.bind("SUPER + SHIFT + Z", "Extract text (OCR) from screenshot", "omarchy-capture-text")
 o.bind("SUPER + Y", "ShelfClip toggle", "shelfclip toggle")
+o.bind("CTRL + Y", "ShelfClip toggle", "/home/viniabdalla/Projects/gitprojects/Shelfclip/shelfclip toggle")
+o.bind("SUPER + CTRL + UP", "Toggle workspace ribbon", "omarchy-shell crazybadger.workspace-ribbon toggle")
+o.bind("SUPER + E", "Files", "xdg-open $HOME")
+o.bind("SUPER + M", "Toggle game telemetry", "wtype -M shift -k F12 -m shift")

@@ -17,31 +17,59 @@
       "source": "https://github.com/bobby-nicholas/omaland.git"
     },
     {
+      "id": "crazybadger.workspace-ribbon",
+      "name": "Workspace Ribbon",
+      "version": "1.0.0",
+      "commit": "3382d889ed6e12fc16562274df077e606844de0f",
+      "source": "https://github.com/crazybadger/omarchy-workspace-ribbon.git"
+    },
+    {
       "id": "crmne.hyprmoncfg",
       "name": "hyprmoncfg: Multi-Monitor Manager for Omarchy",
       "version": "2.2.1",
-      "commit": "39ff6efd4d535f064867d873d6f0ce299c5e1374",
+      "commit": "",
       "source": "https://github.com/crmne/omarchy-hyprmoncfg.git"
     },
     {
       "id": "io.github.andyweiboan.missioncontrol",
       "name": "Mission Control",
       "version": "1.1.0",
-      "commit": "cacdc551ec898f91f01d59d4923e913a94a10d79",
+      "commit": "dbc7a0eccc5f7a50f6b26534798b53b071c4a0a8",
       "source": "https://github.com/AndyWeiBoan/omarchy-mission-control.git"
+    },
+    {
+      "id": "io.github.asmyshlyaev177.last-session",
+      "name": "Last Session",
+      "version": "0.2.0",
+      "commit": "877c6cd98413d97b270db202bd7479badfd2e0ee",
+      "source": "https://github.com/asmyshlyaev177/omarchy-last-session.git"
+    },
+    {
+      "id": "io.github.deunnis.lacquer",
+      "name": "Omarchy Lacquer",
+      "version": "1.0.0",
+      "commit": "0d4a685ff620b08702128168a95449740d6e40c6",
+      "source": "https://github.com/Deunnis/omarchy-lacquer.git"
     },
     {
       "id": "io.github.jordanneenan.simple-power-menu",
       "name": "Simple Power Menu",
       "version": "1.2.0",
-      "commit": "3bb61f633529cbc7544bbe1a7ec05615d412c876",
+      "commit": "",
       "source": "https://github.com/jordanneenan/simple-power-menu.git"
+    },
+    {
+      "id": "io.github.silkvain.dockseid",
+      "name": "Dockseid",
+      "version": "2.0.0",
+      "commit": "c082676305ef8531043f5fedc313ef3f4c6c0bee",
+      "source": "https://github.com/Silkvain/Dockseid.git"
     },
     {
       "id": "rosakodu.dock",
       "name": "Dock",
-      "version": "1.8.8",
-      "commit": "a469e287c38737d672f81b37cdc6036c219fdf3c",
+      "version": "1.8.20",
+      "commit": "a1e70d15c468710d45e02238680e6cb95d1aea2d",
       "source": "https://github.com/rosakodu/omarchy-dock.git"
     },
     {
@@ -55,7 +83,7 @@
       "id": "stappmus.activity-monitor",
       "name": "Activity Monitor",
       "version": "2.1.1",
-      "commit": "b25a98c7ff2a688ab74d86d2be42249e2db2f9cf",
+      "commit": "",
       "source": "https://github.com/stappmus/omarchy-activity-monitor.git"
     }
   ]
