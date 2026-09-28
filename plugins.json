@@ -85,6 +85,13 @@
       "version": "2.1.1",
       "commit": "",
       "source": "https://github.com/stappmus/omarchy-activity-monitor.git"
+    },
+    {
+      "id": "tornikegomareli.spaces",
+      "name": "Spaces",
+      "version": "1.0.0",
+      "commit": "f8306d763c7b3c89d24172edb0e68fb6dacb68a9",
+      "source": "https://github.com/tornikegomareli/omarchy-spaces.git"
     }
   ]
 }

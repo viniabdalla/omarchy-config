@@ -14,7 +14,10 @@
           "id": "omarchy.menu"
         },
         {
-          "id": "omarchy.workspaces"
+          "id": "tornikegomareli.spaces",
+          "showApps": "hoverOnly",
+          "iconSize": 16,
+          "persistentWorkspaces": 4
         }
       ],
       "center": [
@@ -47,9 +50,6 @@
       "right": [
         {
           "id": "omarchy.tray"
-        },
-        {
-          "id": "alanfortlink.camera-effects"
         },
         {
           "id": "viniabdalla.agents"
@@ -94,9 +94,6 @@
     },
     {
       "id": "io.github.silkvain.dockseid"
-    },
-    {
-      "id": "io.github.andyweiboan.missioncontrol"
     },
     {
       "id": "io.github.deunnis.lacquer"
