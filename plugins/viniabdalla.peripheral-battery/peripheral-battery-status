@@ -98,7 +98,7 @@ if command -v bluetoothctl >/dev/null 2>&1; then
   done < <(bluetoothctl devices Connected 2>/dev/null || true)
 fi
 
-mouse_helper="$(dirname "$0")/attack-shark-battery"
+mouse_helper="$(dirname "$0")/attack-shark-battery-hidraw"
 mouse_cache="${XDG_CACHE_HOME:-$HOME/.cache}/opensharkx11/battery"
 if [[ -f "$mouse_cache" ]]; then
   cache_age=$(( $(date +%s) - $(stat -c %Y "$mouse_cache" 2>/dev/null || echo 0) ))
@@ -109,10 +109,33 @@ if [[ -f "$mouse_cache" ]]; then
     fi
   fi
 fi
-if [[ -x "$mouse_helper" ]]; then
-  mouse_pct="$("$mouse_helper" 2>/dev/null || true)"
-  if [[ -n "$mouse_pct" ]]; then
-    add_item "attack-shark-x11" "Attack Shark X11" "$mouse_pct" "mouse" "libusb"
+# Read via hidraw (udev rule 70-attack-shark-hidraw.rules grants uaccess). Never
+# use the libusb helper here: it detaches hid-generic from interface 2 and the
+# kernel re-creates input devices on every call. The helper can wait up to 10s
+# for a battery packet, so attempts are throttled and served from a cache.
+helper_dir="${XDG_CACHE_HOME:-$HOME/.cache}/peripheral-battery"
+helper_cache="$helper_dir/attack-shark"
+helper_stamp="$helper_dir/attack-shark.attempt"
+helper_interval=120
+mkdir -p "$helper_dir"
+if [[ -x "$mouse_helper" ]] && ! pgrep -x opensharkx11 >/dev/null; then
+  (
+    flock -n 9 || exit 0
+    last_attempt=$(stat -c %Y "$helper_stamp" 2>/dev/null || echo 0)
+    if (( $(date +%s) - last_attempt >= helper_interval )); then
+      touch "$helper_stamp"
+      pct="$("$mouse_helper" 2>/dev/null || true)"
+      [[ -n "$pct" ]] && printf '%s\n' "$pct" > "$helper_cache"
+    fi
+  ) 9>"$helper_dir/attack-shark.lock"
+fi
+if [[ -f "$helper_cache" ]]; then
+  cache_age=$(( $(date +%s) - $(stat -c %Y "$helper_cache" 2>/dev/null || echo 0) ))
+  if (( cache_age <= 1800 )); then
+    mouse_pct="$(head -n1 "$helper_cache" 2>/dev/null | tr -cd '0-9')"
+    if [[ -n "$mouse_pct" ]]; then
+      add_item "attack-shark-x11" "Attack Shark X11" "$mouse_pct" "mouse" "hidraw"
+    fi
   fi
 fi
 

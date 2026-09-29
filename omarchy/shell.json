@@ -6,18 +6,18 @@
   },
   "bar": {
     "position": "top",
-    "transparent": false,
+    "transparent": true,
     "centerAnchor": "omarchy.clock",
     "layout": {
       "left": [
         {
-          "id": "omarchy.menu"
+          "id": "viniabdalla.menu"
         },
         {
-          "id": "tornikegomareli.spaces",
-          "showApps": "hoverOnly",
-          "iconSize": 16,
-          "persistentWorkspaces": 4
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "viniabdalla.agenda"
         }
       ],
       "center": [
@@ -41,24 +41,32 @@
           "id": "omarchy.weather"
         },
         {
-          "id": "omarchy.system-update"
+          "id": "gladimdim.config-sync"
         },
         {
-          "id": "gladimdim.config-sync"
+          "id": "omarchy.system-update"
         }
       ],
       "right": [
         {
-          "id": "omarchy.tray"
-        },
-        {
           "id": "viniabdalla.agents"
         },
         {
-          "id": "stappmus.activity-monitor"
+          "id": "stappmus.activity-monitor",
+          "openExpanded": true
         },
         {
           "id": "omarchy.tailscale"
+        },
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "io.github.salemsayed.omaonedrive",
+          "refreshIntervalSec": 30,
+          "recentFileLimit": 20,
+          "panelStyle": "Full",
+          "notifications": true
         },
         {
           "id": "gaming-cursor",
@@ -90,13 +98,22 @@
   },
   "plugins": [
     {
+      "id": "bobbynicholas.omaland"
+    },
+    {
       "id": "ryenski.taildrop"
     },
     {
-      "id": "io.github.silkvain.dockseid"
+      "id": "io.github.andyweiboan.missioncontrol"
     },
     {
-      "id": "io.github.deunnis.lacquer"
+      "id": "io.github.silkvain.dockseid"
     }
+  ],
+  "disabledPlugins": [
+    "omarchy.menu"
+  ],
+  "cloneSourceRestores": [
+    "viniabdalla.menu"
   ]
 }

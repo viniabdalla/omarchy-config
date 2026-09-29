@@ -59,6 +59,13 @@
       "source": "https://github.com/jordanneenan/simple-power-menu.git"
     },
     {
+      "id": "io.github.salemsayed.omaonedrive",
+      "name": "OmaOneDrive",
+      "version": "1.6.2",
+      "commit": "d4eb4ced78a415b90fd4925d6d44b2bf10839f5f",
+      "source": "https://github.com/salemsayed/omaonedrive.git"
+    },
+    {
       "id": "io.github.silkvain.dockseid",
       "name": "Dockseid",
       "version": "2.0.0",
