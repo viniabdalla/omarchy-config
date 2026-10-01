@@ -1033,8 +1033,10 @@ Item {
     // or submenu move freezes the top line where it currently sits — from
     // then on the card grows and shrinks downward instead of re-centering
     // on every resize, which made the menu jump around. The rows height is
-    // frozen at the same moment, so the starting menu also caps how tall the
-    // card may grow from there. Closing unfreezes both.
+    // frozen at the same moment. Local change: the starting menu no longer
+    // caps the rows height (maxRowsHeight stays -1), so a short starting menu
+    // doesn't clip longer submenus; they grow downward up to the screen limit.
+    // Closing unfreezes.
     property int cardTop: -1
     property int maxRowsHeight: -1
     readonly property int centeredTop: Math.max(Style.gapsOut, Math.round((height - root.cardHeight) / 2))
@@ -1042,7 +1044,6 @@ Item {
     function freezeCardTop() {
       if (visible && cardTop < 0) {
         cardTop = effectiveCardTop
-        maxRowsHeight = root.visibleRowsHeight
       }
     }
     onVisibleChanged: if (!visible) { cardTop = -1; maxRowsHeight = -1 }
