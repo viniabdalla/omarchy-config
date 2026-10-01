@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "viniabdalla.functions",
+  "name": "Functions/Skills",
+  "version": "0.1.0",
+  "author": "Vinicius Abdalla",
+  "license": "MIT",
+  "description": "Ícone ƒ na barra que abre o submenu Functions/Skills do menu do Omarchy (id \"personal\" em omarchy-menu.jsonc).",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Functions/Skills",
+    "description": "Abre o menu Functions/Skills (mesmo do Super+M).",
+    "category": "Productivity",
+    "aliases": ["functions", "skills", "funcoes"],
+    "allowMultiple": false
+  }
+}
