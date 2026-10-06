@@ -1,0 +1,148 @@
+# Omarchy Quattro surfaces for SAGA.
+# Ink-black surfaces, soft pastel controls, Walker's solid mint selection,
+# and a smooth monochrome Hyprland border preserve SAGA's quiet contrast.
+
+[bar]
+background = "#05080A"
+background-alpha = 1.0
+text = "#FFF6FF"
+active = "#B2FFF3"
+scale-with-font = true
+size-horizontal = 26
+size-vertical = 28
+
+[hyprland]
+active-border = "rgba(05080aee) rgba(fff6ffee) 90deg"
+active-border-foreground = "#FFF6FF"
+
+[controls]
+normal-color = "#A29DA2"
+normal-fill-alpha = 0.05
+normal-border-width = 1
+normal-border-alpha = 0.30
+
+hover-cursor-color = "#B2FFF3"
+hover-cursor-fill-alpha = 0.12
+hover-cursor-border-width = 1
+hover-cursor-border-alpha = 0.52
+
+focus-color = "#DFBAFF"
+focus-fill-alpha = 0.14
+focus-border-width = 1
+focus-border-alpha = 0.84
+
+selected-color = "#BAF7B5"
+selected-fill-alpha = 0.20
+selected-border-width = 1
+selected-border-alpha = 0.48
+
+pressed-color = "#FF9FBC"
+pressed-fill-alpha = 0.24
+selection-color = "#FFC2DF"
+selection-fill-alpha = 0.38
+
+[spacing]
+scale = 1.0
+scale-with-font = true
+xs = 2
+md = 4
+control-padding-y = 5
+panel-padding = 10
+
+[font]
+base-size = 12
+heading = 16
+icon-large = 18
+
+[popups]
+background = "#05080A"
+background-alpha = 1.0
+text = "#BAF7B5"
+border = "hyprland.active-border"
+border-alpha = 1.0
+border-width = 1
+
+[tooltip]
+background = "#05080A"
+background-alpha = 0.98
+text = "#FFF6FF"
+border = "#141719"
+border-alpha = 1.0
+border-width = 1
+
+[notifications]
+background = "#05080A"
+background-alpha = 1.0
+text = "#FFF6FF"
+border = "hyprland.active-border"
+border-alpha = 1.0
+border-width = 1
+countdown = "#DFBAFF"
+
+[launcher]
+background = "#05080A"
+background-alpha = 1.0
+text = "#FFF6FF"
+border = "hyprland.active-border"
+border-alpha = 1.0
+border-width = 1
+scrim = "#05080A"
+scrim-alpha = 0.0
+selected-background = "#FFE1E1"
+selected-background-alpha = 1.0
+selected-text = "#05080A"
+selected-border = "#BAF7B5"
+selected-border-alpha = 0.0
+selected-border-width = 0
+
+[menu]
+background = "#05080A"
+background-alpha = 1.0
+text = "#FFF6FF"
+border = "hyprland.active-border"
+border-alpha = 1.0
+border-width = 1
+scrim = "#05080A"
+scrim-alpha = 0.0
+selected-background = "#FFE1E1"
+selected-background-alpha = 1.0
+selected-text = "#05080A"
+selected-border = "#BAF7B5"
+selected-border-alpha = 0.0
+selected-border-width = 0
+
+[polkit]
+background = "#05080A"
+background-alpha = 1.0
+text = "#FFF6FF"
+text-error = "#FF9FBC"
+border = "hyprland.active-border"
+border-error = "#FF9FBC"
+border-alpha = 1.0
+border-width = 1
+scrim = "#05080A"
+scrim-alpha = 0.50
+accent = "#DFBAFF"
+
+[lock]
+background = "#05080A"
+background-alpha = 1.0
+text = "#FFF6FF"
+placeholder = "#DCE2F7B3"
+text-error = "#FF9FBC"
+border = "hyprland.active-border"
+border-active = "hyprland.active-border"
+border-error = "#FF9FBC"
+border-alpha = 1.0
+border-width = 1
+selection = "#C5EDC1"
+selection-alpha = 0.45
+
+[image-picker]
+scrim = "#05080A"
+scrim-alpha = 0.50
+text = "#FFF6FF"
+selected-border = "#DFBAFF"
+selected-border-alpha = 1.0
+unselected-border = "#141719"
+unselected-border-alpha = 1.0

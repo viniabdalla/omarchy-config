@@ -6,7 +6,7 @@
   },
   "bar": {
     "position": "top",
-    "transparent": false,
+    "transparent": true,
     "centerAnchor": "omarchy.clock",
     "layout": {
       "left": [
@@ -14,7 +14,20 @@
           "id": "viniabdalla.menu"
         },
         {
-          "id": "omarchy.workspaces"
+          "id": "omarchy.workspaces",
+          "groups": [
+            {
+              "monitor": "eDP-1",
+              "ids": [
+                1,
+                2
+              ],
+              "colorKey": "bright_foreground"
+            }
+          ]
+        },
+        {
+          "id": "data-goblin.fileblade"
         },
         {
           "id": "viniabdalla.agenda"
@@ -111,6 +124,9 @@
     },
     {
       "id": "io.github.silkvain.dockseid"
+    },
+    {
+      "id": "ewweberlin.quickswitch"
     }
   ],
   "disabledPlugins": [

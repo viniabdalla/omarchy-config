@@ -27,7 +27,42 @@
   // Example: replace the default About action by reusing the same id. Existing
   // fields are kept unless overridden.
   // "about": {"icon":"","label":"About","action":"omarchy-launch-or-focus-tui \"zsh -c 'fastfetch; read -k 1'\""},
+  // Functions/Skills: atalhos pessoais em subpastas. Novas categorias entram
+  // como "personal.<pasta>" e seus itens como "personal.<pasta>.<item>".
+  "personal": {"icon":"","label":"Functions/Skills"},
 
-  "apps.artemis": {"label":"Artemis (Faturas Trópico Solar)","action":"uwsm-app -- /home/viniabdalla/Projects/gitprojects/ARTEMIS-CLAUDE/artemis/run_artemis.sh"},
-  "apps.oracle": {"label":"Oracle 3.1 (Proposta Comercial Solar)","action":"uwsm-app -- bash -c \"'/home/viniabdalla/Projects/gitprojects/oracle/OneDrive/CLAUDE CLI/NOVA PROPOSTA COMERCIAL SOLAR/oracle_app 2.2/scripts/launch_webapp.sh'\""}
+  // Functions: funções de ~/.bashrc, abertas num terminal TUI. "bash -ic" é
+  // necessário pois são funções de shell, não binários no PATH.
+  "personal.functions": {"icon":"","label":"Functions"},
+  "personal.functions.tropico-ssh": {"icon":"","label":"SSH Trópico","description":"ssh tropico (MagicDNS tropico-1)","action":"omarchy-launch-tui bash -ic 'tropico-ssh; exec bash'"},
+  "personal.functions.herdr-tropico": {"icon":"","label":"Herdr Trópico","description":"herdr --remote ssh://tropico","action":"omarchy-launch-tui bash -ic 'herdr-tropico; exec bash'"},
+  "personal.functions.stream-janaina": {"icon":"","label":"Stream Janaína","description":"moonlight stream (Desktop)","action":"omarchy-launch-tui bash -ic 'stream janaina; exec bash'"},
+
+  // Omarchy: restarts de componentes. Shell usa setsid (o restart mata o
+  // processo que roda a ação); audio/trackpad usam sudo, então abrem num TUI.
+  "personal.omarchy": {"icon":"","label":"Omarchy"},
+  "personal.omarchy.shell": {"icon":"","label":"Restart Shell","description":"omarchy restart shell (destrava painéis como o Omaland)","action":"setsid -f omarchy restart shell"},
+  "personal.omarchy.hyprland": {"icon":"","label":"Reload Hyprland","description":"omarchy restart hyprctl","action":"omarchy restart hyprctl"},
+  "personal.omarchy.hyprmoncfg": {"icon":"󰍹","label":"Restart hyprmoncfg","description":"systemctl --user restart hyprmoncfgd (destrava \"interactive preview belongs to another client\")","action":"systemctl --user restart hyprmoncfgd && notify-send 'hyprmoncfg' 'Daemon reiniciado. Reabra o hyprmoncfg.'"},
+  "personal.omarchy.audio": {"icon":"","label":"Restart Audio","description":"omarchy restart audio (pede sudo)","action":"omarchy-launch-tui bash -c 'omarchy restart audio; read -n1 -p \"Enter para fechar\"'"},
+  "personal.omarchy.bluetooth": {"icon":"","label":"Restart Bluetooth","description":"omarchy restart bluetooth","action":"omarchy restart bluetooth"},
+  "personal.omarchy.wifi": {"icon":"","label":"Restart Wi-Fi","description":"omarchy restart wifi","action":"omarchy restart wifi"},
+  "personal.omarchy.trackpad": {"icon":"","label":"Restart Trackpad","description":"omarchy restart trackpad (pede sudo)","action":"omarchy-launch-tui bash -c 'omarchy restart trackpad; read -n1 -p \"Enter para fechar\"'"},
+  "personal.omarchy.hyprsunset": {"icon":"","label":"Restart Night Light","description":"omarchy restart hyprsunset","action":"omarchy restart hyprsunset"},
+  "personal.omarchy.screensaver": {"icon":"󱄄","label":"Screensaver","description":"omarchy toggle screensaver (✓ = ligado)","action":"omarchy toggle screensaver","checked":"! omarchy-toggle-enabled screensaver-off"},
+  "personal.omarchy.terminal": {"icon":"","label":"Reload Terminals","description":"omarchy restart terminal","action":"omarchy restart terminal"},
+  "personal.omarchy.xcompose": {"icon":"","label":"Restart XCompose","description":"omarchy restart xcompose","action":"omarchy restart xcompose"},
+  "personal.omarchy.herdr": {"icon":"","label":"Reload Herdr","description":"omarchy restart herdr","action":"omarchy restart herdr"},
+  "personal.omarchy.tmux": {"icon":"","label":"Restart tmux","description":"omarchy restart tmux","action":"omarchy restart tmux"},
+
+  // Skills: acionam um agente/LLM. game-mode deixa escolher quem analisa
+  // (~/.local/bin/game-mode --llm <agente>).
+  "personal.skills": {"icon":"","label":"Skills"},
+  "personal.skills.autopilot": {"icon":"","label":"Autopilot","description":"Codex $autopilot: entrega objetivo com plano, subagentes, revisão e validação","action":"omarchy agent prompt '$autopilot '"},
+  "personal.skills.game-mode": {"icon":"","label":"Game Mode"},
+  "personal.skills.game-mode.claude": {"icon":"","label":"Claude","description":"game-mode --llm claude","action":"omarchy-launch-tui game-mode --llm claude"},
+  "personal.skills.game-mode.codex": {"icon":"","label":"Codex","description":"game-mode --llm codex","action":"omarchy-launch-tui game-mode --llm codex"},
+  "personal.skills.game-mode.agy": {"icon":"","label":"Antigravity (agy)","description":"game-mode --llm agy","action":"omarchy-launch-tui game-mode --llm agy"},
+  "personal.skills.game-mode.openclaw": {"icon":"","label":"OpenClaw","description":"game-mode --llm openclaw","action":"omarchy-launch-tui game-mode --llm openclaw"},
+  "personal.skills.game-mode.none": {"icon":"","label":"Sem LLM","description":"game-mode --llm none","action":"omarchy-launch-tui game-mode --llm none"},
 }

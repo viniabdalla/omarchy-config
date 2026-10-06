@@ -31,6 +31,20 @@
       "source": "https://github.com/crmne/omarchy-hyprmoncfg.git"
     },
     {
+      "id": "data-goblin.fileblade",
+      "name": "FileBlade",
+      "version": "0.2.0",
+      "commit": "b58a46f847134fd8228dc1506b4605b6f62ed523",
+      "source": "https://github.com/data-goblin/fileblade.git"
+    },
+    {
+      "id": "ewweberlin.quickswitch",
+      "name": "QuickSwitch",
+      "version": "1.0.0",
+      "commit": "8a6c42268d0c030e1a6a5e4ee46d0fd30e7128e3",
+      "source": "https://github.com/ewweberlin/QuickSwitch.git"
+    },
+    {
       "id": "io.github.andyweiboan.missioncontrol",
       "name": "Mission Control",
       "version": "1.1.0",

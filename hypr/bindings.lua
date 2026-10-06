@@ -18,3 +18,5 @@ o.bind("SUPER + CTRL + UP", "Toggle workspace ribbon", "omarchy-shell crazybadge
 o.bind("SUPER + E", "Files", "xdg-open $HOME")
 o.bind("SUPER + M", "Minhas funções", "omarchy-menu toggle personal")
 o.bind("SUPER + CTRL + ALT + S", "Spaces settings", "omarchy-shell tornikegomareli.spaces toggle")
+o.bind("SUPER + B", "FileBlade (left)", "omarchy-shell data-goblin.fileblade.control toggleBlade left")
+o.bind("SUPER + SHIFT + B", "FileBlade (right)", "omarchy-shell data-goblin.fileblade.control toggleBlade right")

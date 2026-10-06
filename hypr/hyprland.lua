@@ -24,15 +24,23 @@ require("hypr.autostart")
 require("hypr.center-layout")
 
 -- Toggle config flags dynamically.
-
 require("default.hypr.toggles")
 
 -- Add any other personal Hyprland configuration below.
+-- Equatorial automation stays hidden until explicitly requested.
+o.window("^equatorial-scraper$", {
+  workspace = "special:equatorial silent",
+  no_initial_focus = true,
+  suppress_event = "activate activatefocus maximize",
+})
+o.bind("SUPER + ALT + E", "Mostrar/ocultar Equatorial", "hyprctl dispatch togglespecialworkspace equatorial")
+
 -- o.window("qemu", { workspace = "5" })
 
--- Keep Steam popups floating, but put the main library window on the next
--- empty numbered workspace and tile it.
-o.window({ class = "steam", title = "^Steam$" }, { workspace = "emptyn", tile = true })
+-- Keep Steam in a clean tiled layout on its own workspace.
+o.window("steam", { tile = true, idle_inhibit = "fullscreen" })
+o.window({ class = "steam", title = "Steam" }, { tile = true })
+o.window({ class = "steam", title = "Friends List" }, { tile = true })
 
 -- Added by hyprmoncfg: its generated monitor rules load last, so nothing before this can override the applied layout.
-do local path = os.getenv("HOME") .. "/.config/hypr/hyprmoncfg-monitors.lua"; local file = io.open(path, "r"); if file then file:close(); dofile(path) end end
+do local path = (os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config") .. "/hypr/hyprmoncfg-monitors.lua"; local file = io.open(path, "r"); if file then file:close(); dofile(path) end end
