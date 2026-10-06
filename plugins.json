@@ -73,6 +73,13 @@
       "source": "https://github.com/jordanneenan/simple-power-menu.git"
     },
     {
+      "id": "io.github.rawritude.floating-mode",
+      "name": "Floating Window Mode",
+      "version": "1.10.0",
+      "commit": "e16b8a3fb4cfa243fd1e9af669e47c3d3e094f9e",
+      "source": "https://github.com/jwm3000/omarchy-windows.git"
+    },
+    {
       "id": "io.github.salemsayed.omaonedrive",
       "name": "OmaOneDrive",
       "version": "1.6.2",
