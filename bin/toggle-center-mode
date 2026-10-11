@@ -1,23 +1,54 @@
 #!/bin/bash
-# Toggle the "center" layout on the current workspace; restore the previous one.
+# Cycle current workspace: previous layout -> center -> focus-left -> previous.
+set -e
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/center-mode"
-ws=$(hyprctl activeworkspace -j | jq -r '.id')
+workspace=$(hyprctl activeworkspace -j)
+ws=$(jq -r '.id' <<<"$workspace")
 [[ $ws =~ ^-?[0-9]+$ ]] || exit 1
-cur=$(hyprctl activeworkspace -j | jq -r '.tiledLayout')
+cur=$(jq -r '.tiledLayout' <<<"$workspace")
 prev_file="$STATE/$ws.prev"
+mode_file="$STATE/$ws.mode"
+# Hyprland 0.56 can report the first registered Lua layout for all Lua layouts.
+if [[ $cur == lua:* || $cur == center || $cur == focus-left ]]; then
+  saved_mode=$(cat "$mode_file" 2>/dev/null || true)
+  [[ $saved_mode == focus-left ]] && cur=lua:focus-left
+  [[ $saved_mode == saved ]] && cur=lua:saved
+fi
 
 set_layout() {
-  hyprctl eval "hl.workspace_rule({ workspace = \"$ws\", layout = \"$1\" })" >/dev/null
+  hyprctl eval "center_mode_rules = center_mode_rules or {}; if center_mode_rules[\"$ws\"] then center_mode_rules[\"$ws\"]:set_enabled(false) end; center_mode_rules[\"$ws\"] = hl.workspace_rule({ workspace = \"$ws\", layout = \"$1\" })" >/dev/null
 }
 
-if [[ $cur == lua:center || $cur == center ]]; then
-  prev=$(cat "$prev_file" 2>/dev/null)
-  set_layout "${prev:-dwindle}"
-  rm -f "$prev_file"
-  rm -f "$STATE/hub"; rmdir "$STATE" 2>/dev/null
-else
+case "$cur" in
+  lua:center|center)
+    set_layout lua:focus-left
+    echo focus-left >"$mode_file"
+    label="Focus Left"
+    ;;
+  lua:focus-left|focus-left|lua:saved|saved)
+    prev=$(cat "$prev_file" 2>/dev/null || true)
+    set_layout "${prev:-dwindle}"
+    rm -f "$prev_file" "$mode_file" "$STATE/$ws.hub" "$STATE/$ws.saved"
+    rmdir "$STATE" 2>/dev/null || true
+    label="Tiled"
+    ;;
+  *)
+    mkdir -p "$STATE"
+    echo "$cur" >"$prev_file"
+    hyprctl activewindow -j | jq -r '.address // empty' >"$STATE/$ws.hub"
+    set_layout lua:center
+    echo center >"$mode_file"
+    label="Focus Center"
+    ;;
+esac
+
+notification_file="$STATE/notification-id"
+replace_id=$(cat "$notification_file" 2>/dev/null || true)
+notify_args=(-p -g 󱂬 -t 1500)
+if [[ $replace_id =~ ^[1-9][0-9]*$ ]]; then
+  notify_args+=(-r "$replace_id")
+fi
+if notification_id=$(omarchy-notification-send "${notify_args[@]}" "$label" 2>/dev/null) && [[ $notification_id =~ ^[1-9][0-9]*$ ]]; then
   mkdir -p "$STATE"
-  echo "$cur" >"$prev_file"
-  hyprctl activewindow -j | jq -r '.address // empty' >"$STATE/hub"
-  set_layout lua:center
+  printf '%s\n' "$notification_id" >"$notification_file"
 fi

@@ -31,6 +31,23 @@ Panel {
   readonly property var provider: providers.length > 0 ? providers[providerIndex] : null
 
   property bool cursorActive: false
+  // false = detailed dashboard, true = concentric rings around the logo.
+  property bool ringsView: false
+
+  // Bar icon style: concentric rings (default) or the original meter bars.
+  // The choice is saved to shell.json; styleOverride covers the moment between
+  // clicking and the shell reloading the saved value.
+  property string styleOverride: ""
+  readonly property string savedBarStyle: settings && settings.barStyle === "meter" ? "meter" : "rings"
+  readonly property bool ringsBar: (styleOverride !== "" ? styleOverride : savedBarStyle) === "rings"
+
+  function toggleBarStyle() {
+    styleOverride = ringsBar ? "meter" : "rings"
+    saveBarStyle.command = ["omarchy", "bar", "set", "viniabdalla.agents", "barStyle", styleOverride]
+    saveBarStyle.running = true
+  }
+
+  Process { id: saveBarStyle }
 
   // Countdowns and "updated" read this instead of Date.now() so the
   // panel keeps telling the truth while it sits open.
@@ -311,6 +328,7 @@ Panel {
   }
 
   function barProviderIconName(id) {
+    if (id === "claude") return "claude-bar"
     return String(id || "")
   }
 
@@ -434,7 +452,49 @@ Panel {
       spacing: Style.space(8)
 
       Repeater {
-        model: root.barLimitProviders
+        model: root.ringsBar ? root.barLimitProviders : []
+
+        delegate: Item {
+          id: ringIcon
+
+          required property var modelData
+
+          width: Style.space(24)
+          height: Style.space(24)
+          anchors.verticalCenter: parent.verticalCenter
+
+          RingGauge {
+            anchors.fill: parent
+            weekly: root.weeklyPercent(ringIcon.modelData)
+            session: root.sessionPercent(ringIcon.modelData)
+          }
+
+          Image {
+            id: ringLogo
+            anchors.centerIn: parent
+            width: parent.width * 0.38
+            height: width
+            source: Qt.resolvedUrl("assets/" + root.barProviderIconName(ringIcon.modelData.providerId) + ".svg")
+            sourceSize.width: width * 2
+            sourceSize.height: width * 2
+            fillMode: Image.PreserveAspectFit
+          }
+
+          Text {
+            textFormat: Text.PlainText
+            anchors.centerIn: parent
+            visible: ringLogo.status !== Image.Ready
+            text: root.shortProviderLabel(ringIcon.modelData.providerId).charAt(0)
+            color: root.foreground
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            renderType: Text.NativeRendering
+          }
+        }
+      }
+
+      Repeater {
+        model: root.ringsBar ? [] : root.barLimitProviders
 
         delegate: Row {
           id: providerGroup
@@ -556,6 +616,37 @@ Panel {
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onTextKey: function(t) { if (t === "r" || t === "R") root.refreshNow() }
 
+      Button {
+        id: viewToggle
+        z: 10
+        visible: !!root.provider
+        anchors.top: parent.top
+        anchors.right: parent.right
+        text: root.ringsView ? "≡" : "◎"
+        bordered: true
+        foreground: root.foreground
+        fontFamily: root.fontFamily
+        fontSize: Style.font.body
+        verticalPadding: Style.spacing.controlPaddingY
+        onClicked: root.ringsView = !root.ringsView
+      }
+
+      Button {
+        id: barStyleToggle
+        z: 10
+        visible: !!root.provider && root.barMeterVisible
+        anchors.top: parent.top
+        anchors.right: viewToggle.left
+        anchors.rightMargin: Style.spacing.sm
+        text: root.ringsBar ? "▬" : "◯"
+        bordered: true
+        foreground: root.foreground
+        fontFamily: root.fontFamily
+        fontSize: Style.font.body
+        verticalPadding: Style.spacing.controlPaddingY
+        onClicked: root.toggleBarStyle()
+      }
+
       Flickable {
         id: panelFlick
         anchors.fill: parent
@@ -582,46 +673,7 @@ Panel {
             foreground: root.foreground
             fontFamily: root.fontFamily
 
-            iconComponent: Component {
-              Item {
-                id: heroMark
-                property var candidates: root.iconCandidatesForProvider(root.provider, root.surface)
-                // Provider objects are rebuilt on every refresh, which churns the
-                // array's identity without changing its content. Restart the fallback
-                // walk only when the URLs change: re-pointing source at a URL whose
-                // load already failed emits no statusChanged, so an identity-only
-                // reset would strand the walker on a missing -light twin.
-                property string candidatesKey: candidates.join("\n")
-                property int candidateIndex: 0
-                onCandidatesKeyChanged: candidateIndex = 0
-
-                width: Style.font.display
-                height: Style.font.display
-
-                Image {
-                  id: heroMarkImage
-                  anchors.fill: parent
-                  source: heroMark.candidateIndex < heroMark.candidates.length ? heroMark.candidates[heroMark.candidateIndex] : ""
-                  sourceSize.width: Style.font.display * 2
-                  sourceSize.height: Style.font.display * 2
-                  fillMode: Image.PreserveAspectFit
-                  // Advancing source from inside its own status change trips the
-                  // binding-loop detector; defer the step one tick.
-                  onStatusChanged: if (status === Image.Error && heroMark.candidateIndex < heroMark.candidates.length)
-                    Qt.callLater(function() { heroMark.candidateIndex++ })
-                }
-
-                Text {
-                  textFormat: Text.PlainText
-                  anchors.centerIn: parent
-                  visible: heroMarkImage.status !== Image.Ready
-                  text: root.iconGlyph
-                  color: root.foreground
-                  font.family: root.fontFamily
-                  font.pixelSize: Style.font.display
-                }
-              }
-            }
+            iconComponent: Component { ProviderMark { } }
           }
 
           Text {
@@ -697,6 +749,11 @@ Panel {
             }
           }
 
+          RingsView {
+            visible: root.ringsView && !!root.provider && (root.weeklyPercent(root.provider) >= 0 || root.sessionPercent(root.provider) >= 0)
+            width: parent.width
+          }
+
           // ---------- Balance / limits ----------
           PanelSeparator {
             visible: balanceSection.visible || limitsSection.visible
@@ -768,7 +825,7 @@ Panel {
 
           Column {
             id: limitsSection
-            visible: root.limits.length > 0
+            visible: !root.ringsView && root.limits.length > 0
             width: parent.width
             spacing: Style.space(10)
 
@@ -797,7 +854,7 @@ Panel {
 
           Column {
             id: usageSection
-            visible: !!root.provider && root.provider.recentDays && root.provider.recentDays.length > 0
+            visible: !root.ringsView && !!root.provider && root.provider.recentDays && root.provider.recentDays.length > 0
             width: parent.width
             spacing: Style.spacing.md
 
@@ -836,7 +893,7 @@ Panel {
 
           Column {
             id: modelSection
-            visible: root.models.length > 0
+            visible: !root.ringsView && root.models.length > 0
             width: parent.width
             spacing: Style.spacing.md
 
@@ -863,7 +920,7 @@ Panel {
 
           Text {
             textFormat: Text.PlainText
-            visible: text !== ""
+            visible: !root.ringsView && text !== ""
             width: parent.width
             topPadding: Style.space(2)
             text: root.footerText()
@@ -872,6 +929,160 @@ Panel {
             font.pixelSize: Style.font.caption
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
+          }
+        }
+      }
+    }
+  }
+
+  // Provider logo with the fallback walk used by the hero and the rings view.
+  component ProviderMark: Item {
+    id: mark
+    property real size: Style.font.display
+    property var candidates: root.iconCandidatesForProvider(root.provider, root.surface)
+    // Provider objects are rebuilt on every refresh, which churns the array's
+    // identity without changing its content. Restart the fallback walk only
+    // when the URLs change: re-pointing source at a URL whose load already
+    // failed emits no statusChanged, so an identity-only reset would strand
+    // the walker on a missing -light twin.
+    property string candidatesKey: candidates.join("\n")
+    property int candidateIndex: 0
+    onCandidatesKeyChanged: candidateIndex = 0
+
+    width: size
+    height: size
+
+    Image {
+      id: markImage
+      anchors.fill: parent
+      source: mark.candidateIndex < mark.candidates.length ? mark.candidates[mark.candidateIndex] : ""
+      sourceSize.width: mark.size * 2
+      sourceSize.height: mark.size * 2
+      fillMode: Image.PreserveAspectFit
+      // Advancing source from inside its own status change trips the
+      // binding-loop detector; defer the step one tick.
+      onStatusChanged: if (status === Image.Error && mark.candidateIndex < mark.candidates.length)
+        Qt.callLater(function() { mark.candidateIndex++ })
+    }
+
+    Text {
+      textFormat: Text.PlainText
+      anchors.centerIn: parent
+      visible: markImage.status !== Image.Ready
+      text: root.iconGlyph
+      color: root.foreground
+      font.family: root.fontFamily
+      font.pixelSize: mark.size
+    }
+  }
+
+  // Concentric usage rings: outer = weekly, inner = 5h session. Sizes follow
+  // the item, so the same gauge serves the bar icon and the panel view.
+  component RingGauge: Canvas {
+    id: gauge
+    property real weekly: -1
+    property real session: -1
+    property real stroke: Math.max(1.5, width * 0.09)
+    property real gap: Math.max(1, width * 0.04)
+    property color trackColor: root.track
+    property color weeklyColor: weekly >= 0.9 ? root.urgent : root.foreground
+    property color sessionColor: session >= 0.9 ? root.urgent : Color.accent
+
+    antialiasing: true
+    onWeeklyChanged: requestPaint()
+    onSessionChanged: requestPaint()
+    onStrokeChanged: requestPaint()
+    onWidthChanged: requestPaint()
+    onTrackColorChanged: requestPaint()
+    onWeeklyColorChanged: requestPaint()
+    onSessionColorChanged: requestPaint()
+
+    onPaint: {
+      var ctx = getContext("2d")
+      ctx.reset()
+      ctx.lineCap = "round"
+      ctx.lineWidth = stroke
+      var cx = width / 2
+      var cy = height / 2
+      var top = -Math.PI / 2
+
+      function ring(radius, value, color) {
+        ctx.strokeStyle = trackColor
+        ctx.beginPath()
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+        ctx.stroke()
+        if (value > 0) {
+          ctx.strokeStyle = color
+          ctx.beginPath()
+          ctx.arc(cx, cy, radius, top, top + Math.PI * 2 * Math.min(1, value))
+          ctx.stroke()
+        }
+      }
+
+      var outer = width / 2 - stroke / 2
+      ring(outer, weekly, weeklyColor)
+      ring(outer - stroke - gap, session, sessionColor)
+    }
+  }
+
+  // Two concentric rings around the logo: outer = weekly, inner = 5h session.
+  component RingsView: Item {
+    id: rings
+    readonly property real weekly: root.weeklyPercent(root.provider)
+    readonly property real session: root.sessionPercent(root.provider)
+    readonly property real diameter: Math.min(width, Style.space(220))
+    readonly property real stroke: Style.space(10)
+    readonly property real gap: Style.space(8)
+
+    implicitHeight: diameter + Style.space(64)
+
+    RingGauge {
+      id: ringCanvas
+      width: rings.diameter
+      height: rings.diameter
+      anchors.horizontalCenter: parent.horizontalCenter
+      weekly: rings.weekly
+      session: rings.session
+      stroke: rings.stroke
+      gap: rings.gap
+    }
+
+    ProviderMark {
+      anchors.centerIn: ringCanvas
+      size: rings.diameter * 0.30
+    }
+
+    Column {
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.top: ringCanvas.bottom
+      anchors.topMargin: Style.space(14)
+      spacing: Style.space(4)
+
+      Repeater {
+        model: [
+          { label: "Weekly", value: rings.weekly, win: "week", color: ringCanvas.weeklyColor },
+          { label: "5h",     value: rings.session, win: "session", color: ringCanvas.sessionColor }
+        ]
+
+        Row {
+          required property var modelData
+          spacing: Style.space(8)
+          anchors.horizontalCenter: parent.horizontalCenter
+
+          Rectangle {
+            width: Style.space(8)
+            height: Style.space(8)
+            radius: width / 2
+            color: modelData.color
+            anchors.verticalCenter: parent.verticalCenter
+          }
+
+          Text {
+            textFormat: Text.PlainText
+            text: modelData.label + "  " + root.pctText(modelData.value)
+            color: root.foreground
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
           }
         }
       }

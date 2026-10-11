@@ -4,7 +4,7 @@ o.bind("CTRL + DOWN", "Close Mission Control", "omarchy-shell shell hide io.gith
 o.bind("CTRL + UP", "Mission Control", "omarchy-shell shell toggle io.github.andyweiboan.missioncontrol '{}'")
 o.bind("PRINT", "Screenshot", "omasnap")
 o.bind("SUPER + ALT + C", "Claude", "xdg-terminal-exec claude")
-o.bind("SUPER + ALT + O", "Toggle center mode", "/home/viniabdalla/.local/bin/toggle-center-mode")
+o.bind("SUPER + ALT + O", "Toggle Floating Mode", "/home/viniabdalla/.config/omarchy/plugins/io.github.rawritude.floating-mode/bin/floating-mode toggle")
 o.bind("SUPER + ALT + Q", "Quick calculator", "menu-calc")
 o.bind("SUPER + ALT + X", "Codex", "xdg-terminal-exec codex")
 o.bind("SUPER + SHIFT + R", "Exit Gaming Mode", "/home/viniabdalla/.local/share/steam-launcher/leave-gamesmode")
@@ -21,3 +21,4 @@ o.bind("SUPER + CTRL + ALT + S", "Spaces settings", "omarchy-shell tornikegomare
 o.bind("SUPER + B", "FileBlade (left)", "omarchy-shell data-goblin.fileblade.control toggleBlade left")
 o.bind("SUPER + SHIFT + B", "FileBlade (right)", "omarchy-shell data-goblin.fileblade.control toggleBlade right")
 o.bind("SUPER + L", "Toggle Floating Mode", "/home/viniabdalla/.config/omarchy/plugins/io.github.rawritude.floating-mode/bin/floating-mode toggle")
+o.bind("ALT + SPACE", "Spotlight", "omarchy-shell shell toggle io.github.maajix.spotlight '{}'")

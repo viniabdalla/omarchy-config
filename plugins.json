@@ -73,6 +73,13 @@
       "source": "https://github.com/jordanneenan/simple-power-menu.git"
     },
     {
+      "id": "io.github.maajix.spotlight",
+      "name": "Spotlight",
+      "version": "1.7.3",
+      "commit": "a0f7fa746169a933e498037863e3353ede126413",
+      "source": "https://github.com/maajix/omarchy-spotlight.git"
+    },
+    {
       "id": "io.github.rawritude.floating-mode",
       "name": "Floating Window Mode",
       "version": "1.10.0",
@@ -92,6 +99,27 @@
       "version": "2.0.0",
       "commit": "ffe97cd4050e9400df8a4cba7ca03de9314ae57d",
       "source": "https://github.com/viniabdalla/Dockseid.git"
+    },
+    {
+      "id": "io.github.tyrichards.tray",
+      "name": "Tray",
+      "version": "1.9.4",
+      "commit": "5c0d9a9f0efcf151f93b5cf991916221671d1601",
+      "source": "https://github.com/TyRichards/omarchy-tray.git"
+    },
+    {
+      "id": "jankeesvw.downloads",
+      "name": "Downloads",
+      "version": "1.1.1",
+      "commit": "a2df3bdeb85571fda08e10dfcea3c3045125665b",
+      "source": "https://github.com/jankeesvw/omarchy-downloads.git"
+    },
+    {
+      "id": "marcho78.titlebars",
+      "name": "Title Bars",
+      "version": "1.0.0",
+      "commit": "b1b13e146eea604ffdeee817b0df17051fad91c6",
+      "source": "https://github.com/marcho78/omarchy-titlebars.git"
     },
     {
       "id": "rosakodu.dock",

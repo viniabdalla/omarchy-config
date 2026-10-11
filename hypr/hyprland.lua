@@ -41,8 +41,14 @@ o.bind("SUPER + ALT + E", "Mostrar/ocultar Equatorial", "hyprctl dispatch toggle
 o.window("steam", { tile = true, idle_inhibit = "fullscreen" })
 o.window({ class = "steam", title = "Steam" }, { tile = true })
 o.window({ class = "steam", title = "Friends List" }, { tile = true })
+-- Steam toast popups must float on top, not take a tile.
+o.window({ class = "steam", title = "^notificationtoasts_.*" }, { float = true, pin = true, no_focus = true })
+
+
+-- Floating Mode manages floating windows and snapping; Title Bars owns titlebars.
+require("hypr.floating-mode")
+require("hypr.titlebars") -- Managed by marcho78.titlebars
 
 -- Added by hyprmoncfg: its generated monitor rules load last, so nothing before this can override the applied layout.
 do local path = os.getenv("HOME") .. "/.config/hypr/hyprmoncfg-monitors.lua"; local file = io.open(path, "r"); if file then file:close(); dofile(path) end end
-
-require("hypr.floating-mode")
+require("hypr.attention")

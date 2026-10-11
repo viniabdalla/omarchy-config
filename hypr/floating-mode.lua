@@ -1,4 +1,4 @@
--- Native titlebars and snapping for Floating Mode. Loaded after Omarchy defaults.
+-- Native snapping for Floating Mode. Title bars belong to a separate plugin.
 hl.plugin.load([====[/home/viniabdalla/.local/share/omarchy-floating-mode/omarchy-windows-snap-947e43449e347e9f.so]====])
 
 hl.config({
@@ -23,28 +23,6 @@ hl.config({
   },
 
   plugin = {
-    hyprbars = {
-      enabled = false,
-      -- Slightly opaque while retaining a hint of the background beneath it.
-      bar_color = "rgba(333333c0)",
-      bar_height = 30,
-      bar_title_enabled = true,
-      bar_text_size = 14,
-      bar_text_weight = 600,
-      bar_text_font = "Sans",
-      bar_text_align = "left",
-      bar_buttons_alignment = "right",
-      bar_part_of_window = true,
-      -- Let Hyprland draw one continuous window border around both the
-      -- native titlebar decoration and the application surface.
-      bar_precedence_over_border = true,
-      bar_padding = 8,
-      bar_button_padding = 6,
-      icon_on_hover = false,
-      button_hover_bg_color = "rgba(ffffff24)",
-      close_button_hover_bg_color = "rgba(ff4d4d48)",
-    },
-
     -- Aero-style edge and corner zones are implemented in the compositor so
     -- titlebar drags and Super+drag share the same scale-aware geometry.
     omarchy_windows_snap = {
@@ -146,7 +124,7 @@ end
 -- workspace and make new windows floating before their first frame.
 omarchy_floating_mode_workspace_rules = {}
 
-function omarchy_floating_mode_set_workspace_enabled(workspace_id, enabled, focus_border_enabled, transparency_enabled, titlebar_transparency_enabled, inactive_color)
+function omarchy_floating_mode_set_workspace_enabled(workspace_id, enabled, focus_border_enabled, transparency_enabled, inactive_color)
   workspace_id = tonumber(workspace_id)
   if workspace_id == nil or workspace_id ~= math.floor(workspace_id) then return end
   local key = tostring(workspace_id)
@@ -206,22 +184,6 @@ function omarchy_floating_mode_set_workspace_enabled(workspace_id, enabled, focu
         },
         opacity = "1.0 override 1.0 override",
       }),
-      titlebar_transparent = hl.window_rule({
-        name = "floating-mode-titlebar-transparent-workspace-" .. label,
-        match = {
-          tag = "floating-mode-managed",
-          workspace = key,
-        },
-        ["hyprbars:bar_color"] = "rgba(333333c0)",
-      }),
-      titlebar_opaque = hl.window_rule({
-        name = "floating-mode-titlebar-opaque-workspace-" .. label,
-        match = {
-          tag = "floating-mode-managed",
-          workspace = key,
-        },
-        ["hyprbars:bar_color"] = "rgba(333333ff)",
-      }),
     }
     omarchy_floating_mode_workspace_rules[key] = rules
   end
@@ -230,8 +192,6 @@ function omarchy_floating_mode_set_workspace_enabled(workspace_id, enabled, focu
   rules.browser:set_enabled(enabled)
   rules.no_focus:set_enabled(enabled and not focus_border_enabled)
   rules.opaque:set_enabled(enabled and not transparency_enabled)
-  rules.titlebar_transparent:set_enabled(enabled and titlebar_transparency_enabled)
-  rules.titlebar_opaque:set_enabled(enabled and not titlebar_transparency_enabled)
 end
 
 function omarchy_floating_mode_disable_all_workspace_rules()
@@ -241,8 +201,6 @@ function omarchy_floating_mode_disable_all_workspace_rules()
     rules.browser:set_enabled(false)
     rules.no_focus:set_enabled(false)
     rules.opaque:set_enabled(false)
-    rules.titlebar_transparent:set_enabled(false)
-    rules.titlebar_opaque:set_enabled(false)
   end
 end
 
@@ -256,8 +214,6 @@ function omarchy_floating_mode_disable_workspace_rules(workspace_id)
   rules.browser:set_enabled(false)
   rules.no_focus:set_enabled(false)
   rules.opaque:set_enabled(false)
-  rules.titlebar_transparent:set_enabled(false)
-  rules.titlebar_opaque:set_enabled(false)
 end
 
 -- Optional fully opaque rendering for every window while Floating Mode is on.
@@ -284,15 +240,6 @@ hl.window_rule({
   tag = "-floating-mode-no-focus",
 })
 
--- Buttons are declared right-to-left: close, then maximize.
-hl.plugin.hyprbars.add_button({
-  bg_color = "rgba(00000000)",
-  fg_color = "rgba(ffffffff)",
-  size = 21,
-  icon = "X",
-  action = [[hyprctl dispatch 'hl.dsp.window.close({})']],
-})
-
 -- A maximized floating window fills the work area, so its decorative border
 -- adds no useful separation. This dynamic rule restores the normal themed
 -- border automatically as soon as the window leaves maximized state.
@@ -303,12 +250,4 @@ hl.window_rule({
     fullscreen_state_internal = 1,
   },
   border_size = 0,
-})
-
-hl.plugin.hyprbars.add_button({
-  bg_color = "rgba(00000000)",
-  fg_color = "rgba(ffffffff)",
-  size = 21,
-  icon = "□",
-  action = [[hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" })']],
 })

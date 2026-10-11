@@ -1,0 +1,5 @@
+#!/bin/bash
+# Managed by marcho78.titlebars: rebuilds hyprbars when an update brings a new Hyprland.
+# Written by `titlebars setup`; `titlebars uninstall` removes this file.
+titlebars="$HOME/.config/omarchy/plugins/marcho78.titlebars/bin/titlebars"
+[[ -f $titlebars ]] && exec /usr/bin/python3 -I "$titlebars" build

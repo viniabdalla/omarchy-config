@@ -38,6 +38,9 @@
           "id": "viniabdalla.indicators"
         },
         {
+          "id": "omarchy.weather"
+        },
+        {
           "id": "omarchy.clock",
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
@@ -51,51 +54,81 @@
           "id": "omarchy.keyboard-layout"
         },
         {
+          "id": "viniabdalla.layout-manager"
+        },
+        {
           "id": "io.github.rawritude.floating-mode"
         },
         {
-          "id": "omarchy.weather"
-        },
-        {
-          "id": "gladimdim.config-sync"
+          "id": "jankeesvw.downloads"
         },
         {
           "id": "omarchy.system-update"
+        },
+        {
+          "id": "window-attention.indicator"
         }
       ],
       "right": [
         {
+          "id": "io.github.tyrichards.tray",
+          "hidden": [],
+          "order": [
+            "Claude_status_icon_1",
+            "steam",
+            "discord_status_icon_1",
+            "omarchy.tailscale",
+            "gladimdim.config-sync",
+            "io.github.salemsayed.omaonedrive",
+            "omarchy.monitor",
+            "TelegramDesktop"
+          ],
+          "widgets": [
+            {
+              "entry": {
+                "id": "omarchy.tailscale"
+              },
+              "listed": true
+            },
+            {
+              "entry": {
+                "id": "io.github.salemsayed.omaonedrive",
+                "notifications": true,
+                "panelStyle": "Full",
+                "recentFileLimit": 20,
+                "refreshIntervalSec": 30
+              },
+              "listed": true
+            },
+            {
+              "entry": {
+                "id": "omarchy.monitor"
+              },
+              "listed": true
+            },
+            {
+              "entry": {
+                "id": "gladimdim.config-sync"
+              },
+              "listed": true
+            }
+          ],
+          "showTrayIcons": true
+        },
+        {
           "id": "viniabdalla.functions"
         },
         {
-          "id": "viniabdalla.agents"
+          "id": "viniabdalla.agents",
+          "barStyle": "rings"
         },
         {
           "id": "stappmus.activity-monitor",
           "openExpanded": true
         },
         {
-          "id": "omarchy.tailscale"
-        },
-        {
-          "id": "omarchy.tray"
-        },
-        {
-          "id": "io.github.salemsayed.omaonedrive",
-          "refreshIntervalSec": 30,
-          "recentFileLimit": 20,
-          "panelStyle": "Full",
-          "notifications": true
-        },
-        {
           "id": "gaming-cursor",
           "type": "qml"
-        },
-        {
-          "id": "omarchy.network"
-        },
-        {
-          "id": "omarchy.bluetooth"
         },
         {
           "id": "omarchy.audio"
@@ -104,7 +137,10 @@
           "id": "crmne.hyprmoncfg"
         },
         {
-          "id": "omarchy.monitor"
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.bluetooth"
         },
         {
           "id": "omarchy.power"
@@ -130,6 +166,24 @@
     },
     {
       "id": "ewweberlin.quickswitch"
+    },
+    {
+      "id": "io.github.maajix.spotlight"
+    },
+    {
+      "id": "omarchy.tailscale"
+    },
+    {
+      "id": "io.github.salemsayed.omaonedrive"
+    },
+    {
+      "id": "omarchy.monitor"
+    },
+    {
+      "id": "gladimdim.config-sync"
+    },
+    {
+      "id": "marcho78.titlebars"
     }
   ],
   "disabledPlugins": [

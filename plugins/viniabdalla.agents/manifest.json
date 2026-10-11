@@ -38,9 +38,21 @@
       "syncMode": "Off",
       "syncDir": "",
       "syncFileName": "",
-      "syncDeviceId": ""
+      "syncDeviceId": "",
+      "barStyle": "rings"
     },
     "schema": [
+      {
+        "key": "barStyle",
+        "type": "enum",
+        "label": "Bar icon style",
+        "options": [
+          "rings",
+          "meter"
+        ],
+        "defaultValue": "rings",
+        "description": "rings: logo with weekly and 5h rings. meter: logo, 5h bar and percentages."
+      },
       {
         "key": "refreshIntervalSec",
         "type": "integer",

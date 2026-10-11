@@ -72,7 +72,7 @@ hl.config({
     rounding_power = 1,
 
     blur = {
-      enabled = false,
+      enabled = true,
     },
 
     glow = {
