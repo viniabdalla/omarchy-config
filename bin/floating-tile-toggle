@@ -1,0 +1,13 @@
+#!/bin/bash
+# Toggle a workspace between Omarchy's floating mode and the default tiled layout (never scrolling).
+# Usage: floating-tile-toggle [workspace-id]   (defaults to the active workspace)
+ws=${1:-$(hyprctl activeworkspace -j | jq -r '.id')}
+[[ $ws =~ ^[0-9]+$ ]] || exit 1
+dir="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/workspace-layouts"
+file="$dir/$ws.lua"
+default=$(omarchy-hyprland-workspace-layout-default)
+if [[ -r $file ]] && grep -q 'mode = "floating"' "$file"; then target=$default; else target=floating; fi
+hyprctl eval "o.workspace_mode({ workspace = \"$ws\", mode = \"$target\" })" >/dev/null 2>&1 || { notify-send "Floating / tiled" "Could not apply $target"; exit 1; }
+if [[ $target == "$default" ]]; then rm -f "$file"; else mkdir -p "$dir" && printf 'o.workspace_mode({ workspace = "%s", mode = "floating" })\n' "$ws" >"$file"; fi
+omarchy-shell -q omarchy.workspaces refresh 2>/dev/null; omarchy-shell -q omarchy.dock refresh 2>/dev/null
+notify-send -t 1500 "Workspace $ws" "$target"

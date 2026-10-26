@@ -9,14 +9,15 @@ cur=$(jq -r '.tiledLayout' <<<"$workspace")
 prev_file="$STATE/$ws.prev"
 mode_file="$STATE/$ws.mode"
 # Hyprland 0.56 can report the first registered Lua layout for all Lua layouts.
-if [[ $cur == lua:* || $cur == center || $cur == focus-left ]]; then
+if [[ $cur == lua:* || $cur == master || $cur == center || $cur == focus-left ]]; then
   saved_mode=$(cat "$mode_file" 2>/dev/null || true)
+  [[ $saved_mode == center ]] && cur=lua:center
   [[ $saved_mode == focus-left ]] && cur=lua:focus-left
   [[ $saved_mode == saved ]] && cur=lua:saved
 fi
 
 set_layout() {
-  hyprctl eval "center_mode_rules = center_mode_rules or {}; if center_mode_rules[\"$ws\"] then center_mode_rules[\"$ws\"]:set_enabled(false) end; center_mode_rules[\"$ws\"] = hl.workspace_rule({ workspace = \"$ws\", layout = \"$1\" })" >/dev/null
+  hyprctl eval "center_mode_set_layout(\"$ws\", \"$1\")" >/dev/null
 }
 
 case "$cur" in
@@ -35,7 +36,8 @@ case "$cur" in
   *)
     mkdir -p "$STATE"
     echo "$cur" >"$prev_file"
-    hyprctl activewindow -j | jq -r '.address // empty' >"$STATE/$ws.hub"
+    # Focus can sit on the other monitor; only a window on this workspace is its hub.
+    hyprctl activewindow -j | jq -r --argjson ws "$ws" 'select(.workspace.id == $ws) | .address // empty' >"$STATE/$ws.hub"
     set_layout lua:center
     echo center >"$mode_file"
     label="Focus Center"

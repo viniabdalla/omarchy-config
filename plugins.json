@@ -26,8 +26,8 @@
     {
       "id": "crmne.hyprmoncfg",
       "name": "hyprmoncfg: Multi-Monitor Manager for Omarchy",
-      "version": "2.2.1",
-      "commit": "",
+      "version": "2.10.0",
+      "commit": "3e9fa1feb3e64352773e818eb4fd6cd496976e39",
       "source": "https://github.com/crmne/omarchy-hyprmoncfg.git"
     },
     {
@@ -80,6 +80,13 @@
       "source": "https://github.com/maajix/omarchy-spotlight.git"
     },
     {
+      "id": "io.github.pjgeutjens.clockwork",
+      "name": "Clockwork",
+      "version": "0.7.1",
+      "commit": "afaa28a80e884f93ff4279724d2170776da24bfe",
+      "source": "https://github.com/pjgeutjens/omarchy-clockwork.git"
+    },
+    {
       "id": "io.github.rawritude.floating-mode",
       "name": "Floating Window Mode",
       "version": "1.10.0",
@@ -108,6 +115,13 @@
       "source": "https://github.com/TyRichards/omarchy-tray.git"
     },
     {
+      "id": "io.github.vk2r.battle-station",
+      "name": "BattleStation",
+      "version": "1.1.2",
+      "commit": "b2eb7ab8cc144631fcc34eb218a22e2c515346ce",
+      "source": "https://github.com/vk2r/battle-station.git"
+    },
+    {
       "id": "jankeesvw.downloads",
       "name": "Downloads",
       "version": "1.1.1",
@@ -120,6 +134,20 @@
       "version": "1.0.0",
       "commit": "b1b13e146eea604ffdeee817b0df17051fad91c6",
       "source": "https://github.com/marcho78/omarchy-titlebars.git"
+    },
+    {
+      "id": "omaplug",
+      "name": "Plugin Manager",
+      "version": "1.6.6",
+      "commit": "64df56e876846247ded550890c52b7b190776b3e",
+      "source": "https://github.com/fross100/omaplug"
+    },
+    {
+      "id": "renardoberou.plugin-tax",
+      "name": "Plugin Tax",
+      "version": "0.3.0",
+      "commit": "a6fe54c6def42689af93c7d52f09435b3edc0385",
+      "source": "https://github.com/renardoberou/omarchy-plugin-tax.git"
     },
     {
       "id": "rosakodu.dock",

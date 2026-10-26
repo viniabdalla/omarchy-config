@@ -1,6 +1,6 @@
 import QtQuick
-import Quickshell.Io
 import qs.Ui
+import ".."
 
 BarIndicator {
   id: root
@@ -23,13 +23,9 @@ BarIndicator {
     else icon = ""
   }
 
-  Process {
-    command: ["bash", "-c", "omarchy-voxtype-status"]
-    running: true
-    stdout: SplitParser {
-      onRead: function(data) { root.update(data) }
-    }
-  }
+  readonly property string status: DictationState.raw
+  onStatusChanged: if (status !== "") update(status)
+  Component.onCompleted: if (status !== "") update(status)
 
   onPressed: function() {
     if (!root.bar) return

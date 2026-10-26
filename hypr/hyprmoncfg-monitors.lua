@@ -20,12 +20,4 @@ hl.monitor({
   sdr_max_luminance = 80,
 })
 
-hl.workspace_rule({ workspace = "1", monitor = "desc:AU Optronics 0xED8F", default = true, persistent = true })
-hl.workspace_rule({ workspace = "2", monitor = "desc:AU Optronics 0xED8F" })
-hl.workspace_rule({ workspace = "3", monitor = "desc:Beihai Century Joint Innovation Technology Co.Ltd Blizzard 27' 0000000000000", default = true, persistent = true })
-hl.workspace_rule({ workspace = "4", monitor = "desc:Beihai Century Joint Innovation Technology Co.Ltd Blizzard 27' 0000000000000" })
-hl.workspace_rule({ workspace = "5", monitor = "desc:AU Optronics 0xED8F" })
-hl.workspace_rule({ workspace = "6", monitor = "desc:AU Optronics 0xED8F" })
-hl.workspace_rule({ workspace = "7", monitor = "desc:Beihai Century Joint Innovation Technology Co.Ltd Blizzard 27' 0000000000000" })
-hl.workspace_rule({ workspace = "8", monitor = "desc:Beihai Century Joint Innovation Technology Co.Ltd Blizzard 27' 0000000000000" })
-hl.workspace_rule({ workspace = "9", monitor = "desc:AU Optronics 0xED8F" })
+hl.config({ input = { touchdevice = { transform = 0 }, tablet = { transform = 0 } } })

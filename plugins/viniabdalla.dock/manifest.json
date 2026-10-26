@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "viniabdalla.dock",
+  "name": "Dock Vini",
+  "version": "1.0.0",
+  "author": "viniabdalla",
+  "description": "Omarchy dock shown on every workspace (tiled and floating), auto-hide like Dockseid",
+  "kinds": [
+    "service"
+  ],
+  "entryPoints": {
+    "service": "Dock.qml"
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.dock"
+  }
+}

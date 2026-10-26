@@ -459,8 +459,8 @@ Panel {
 
           required property var modelData
 
-          width: Style.space(24)
-          height: Style.space(24)
+          width: Style.space(18)
+          height: Style.space(18)
           anchors.verticalCenter: parent.verticalCenter
 
           RingGauge {
@@ -472,7 +472,7 @@ Panel {
           Image {
             id: ringLogo
             anchors.centerIn: parent
-            width: parent.width * 0.38
+            width: parent.width * 0.44
             height: width
             source: Qt.resolvedUrl("assets/" + root.barProviderIconName(ringIcon.modelData.providerId) + ".svg")
             sourceSize.width: width * 2

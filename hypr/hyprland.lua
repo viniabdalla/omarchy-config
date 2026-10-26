@@ -10,8 +10,11 @@ dofile((os.getenv("OMARCHY_PATH") or "/usr/share/omarchy") .. "/default/hypr/boo
 -- keeping core window-manager bindings:
 -- omarchy_preinstalled_bindings = false
 
+-- Hide Omarchy's own titlebars.so before its defaults load (see native-floating.lua).
+require("hypr.native-floating")
+
 -- Load Omarchy defaults.
-require("default.hypr.omarchy")
+require("hypr.chrome-titlebars")(function() require("default.hypr.omarchy") end) -- Chrome native maximize override
 
 -- Put your personal overrides in these files. They're loaded after Omarchy's
 -- defaults so package updates can improve the defaults without rewriting your
@@ -45,10 +48,9 @@ o.window({ class = "steam", title = "Friends List" }, { tile = true })
 o.window({ class = "steam", title = "^notificationtoasts_.*" }, { float = true, pin = true, no_focus = true })
 
 
--- Floating Mode manages floating windows and snapping; Title Bars owns titlebars.
-require("hypr.floating-mode")
+-- Floating comes from Omarchy 4.5's native workspace mode (SUPER+ALT+O); Title Bars owns titlebars.
+-- disabled for Omarchy 4.5 (native floating): require("hypr.floating-mode")
 require("hypr.titlebars") -- Managed by marcho78.titlebars
 
 -- Added by hyprmoncfg: its generated monitor rules load last, so nothing before this can override the applied layout.
 do local path = os.getenv("HOME") .. "/.config/hypr/hyprmoncfg-monitors.lua"; local file = io.open(path, "r"); if file then file:close(); dofile(path) end end
-require("hypr.attention")

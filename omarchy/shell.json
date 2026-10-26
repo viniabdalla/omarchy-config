@@ -1,39 +1,16 @@
 {
-  "version": 1,
-  "idle": {
-    "screensaver": 600,
-    "lock": 900
-  },
   "bar": {
-    "position": "top",
-    "transparent": false,
-    "centerAnchor": "omarchy.clock",
+    "background": "opaque",
     "layout": {
-      "left": [
+      "center": [
         {
-          "id": "viniabdalla.menu"
-        },
-        {
-          "id": "omarchy.workspaces",
-          "groups": [
-            {
-              "monitor": "eDP-1",
-              "ids": [
-                1,
-                2
-              ],
-              "colorKey": "bright_foreground"
-            }
-          ]
-        },
-        {
-          "id": "data-goblin.fileblade"
-        },
-        {
-          "id": "viniabdalla.agenda"
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "verticalFormat": "HH\n—\nmm"
         }
       ],
-      "center": [
+      "centerBegin": [
         {
           "id": "viniabdalla.indicators"
         },
@@ -41,62 +18,101 @@
           "id": "omarchy.weather"
         },
         {
-          "id": "omarchy.clock",
-          "format": "dddd HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "verticalFormat": "HH\n—\nmm"
+          "id": "renardoberou.plugin-tax"
+        }
+      ],
+      "centerEnd": [
+        {
+          "cities": [
+            {
+              "lat": -2.52972,
+              "lon": -44.30278,
+              "name": "São Luís",
+              "region": "Maranhão, BR",
+              "zone": "America/Fortaleza"
+            },
+            {
+              "name": "London",
+              "zone": "Europe/London"
+            },
+            {
+              "lat": 40.71427,
+              "lon": -74.00597,
+              "name": "New York",
+              "region": "US",
+              "zone": "America/New_York"
+            },
+            {
+              "name": "Tokyo",
+              "zone": "Asia/Tokyo"
+            },
+            {
+              "name": "Los Angeles",
+              "zone": "America/Los_Angeles"
+            }
+          ],
+          "id": "omarchy.elsewhen"
         },
         {
           "id": "mission_control_button",
           "type": "qml"
         },
         {
-          "id": "omarchy.keyboard-layout"
-        },
-        {
           "id": "viniabdalla.layout-manager"
-        },
-        {
-          "id": "io.github.rawritude.floating-mode"
-        },
-        {
-          "id": "jankeesvw.downloads"
         },
         {
           "id": "omarchy.system-update"
         },
         {
-          "id": "window-attention.indicator"
+          "id": "viniabdalla.functions"
+        },
+        {
+          "id": "omaplug"
+        }
+      ],
+      "left": [
+        {
+          "id": "viniabdalla.menu"
+        },
+        {
+          "groups": [
+            {
+              "colorKey": "bright_foreground",
+              "ids": [
+                1,
+                2
+              ],
+              "monitor": "eDP-1"
+            }
+          ],
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "marcho78.titlebars"
+        },
+        {
+          "id": "viniabdalla.taskblade"
         }
       ],
       "right": [
         {
-          "id": "io.github.tyrichards.tray",
+          "id": "omarchy.keyboard-layout"
+        },
+        {
           "hidden": [],
+          "id": "io.github.tyrichards.tray",
           "order": [
-            "Claude_status_icon_1",
-            "steam",
-            "discord_status_icon_1",
-            "omarchy.tailscale",
-            "gladimdim.config-sync",
-            "io.github.salemsayed.omaonedrive",
             "omarchy.monitor",
-            "TelegramDesktop"
+            "omarchy.tailscale",
+            "io.github.salemsayed.omaonedrive",
+            "discord_status_icon_1",
+            "gladimdim.config-sync"
           ],
+          "showTrayIcons": true,
           "widgets": [
             {
               "entry": {
                 "id": "omarchy.tailscale"
-              },
-              "listed": true
-            },
-            {
-              "entry": {
-                "id": "io.github.salemsayed.omaonedrive",
-                "notifications": true,
-                "panelStyle": "Full",
-                "recentFileLimit": 20,
-                "refreshIntervalSec": 30
               },
               "listed": true
             },
@@ -111,20 +127,28 @@
                 "id": "gladimdim.config-sync"
               },
               "listed": true
+            },
+            {
+              "entry": {
+                "id": "io.github.salemsayed.omaonedrive",
+                "notifications": true,
+                "panelStyle": "Full",
+                "recentFileLimit": 20,
+                "refreshIntervalSec": 120
+              },
+              "listed": true
             }
-          ],
-          "showTrayIcons": true
+          ]
         },
         {
-          "id": "viniabdalla.functions"
+          "barStyle": "rings",
+          "id": "viniabdalla.agents"
         },
         {
-          "id": "viniabdalla.agents",
-          "barStyle": "rings"
+          "id": "io.github.vk2r.battle-station"
         },
         {
-          "id": "stappmus.activity-monitor",
-          "openExpanded": true
+          "id": "stappmus.activity-monitor"
         },
         {
           "id": "gaming-cursor",
@@ -148,8 +172,33 @@
         {
           "id": "io.github.jordanneenan.simple-power-menu"
         }
-      ]
-    }
+      ],
+      "tray": []
+    },
+    "position": "top"
+  },
+  "cloneSourceRestores": [
+    "viniabdalla.menu",
+    "viniabdalla.dock"
+  ],
+  "disabledPlugins": [
+    "omarchy.menu",
+    "omarchy.dock"
+  ],
+  "dock": {
+    "autohide": true,
+    "pinned": [
+      "google-chrome",
+      "steam",
+      "foot",
+      "org.telegram.desktop.desktop",
+      "com.rtosta.zapzap",
+      "discord"
+    ]
+  },
+  "idle": {
+    "lock": 900,
+    "screensaver": 600
   },
   "plugins": [
     {
@@ -159,22 +208,10 @@
       "id": "ryenski.taildrop"
     },
     {
-      "id": "io.github.andyweiboan.missioncontrol"
-    },
-    {
-      "id": "io.github.silkvain.dockseid"
-    },
-    {
       "id": "ewweberlin.quickswitch"
     },
     {
-      "id": "io.github.maajix.spotlight"
-    },
-    {
       "id": "omarchy.tailscale"
-    },
-    {
-      "id": "io.github.salemsayed.omaonedrive"
     },
     {
       "id": "omarchy.monitor"
@@ -183,13 +220,11 @@
       "id": "gladimdim.config-sync"
     },
     {
-      "id": "marcho78.titlebars"
+      "id": "io.github.silkvain.dockseid"
+    },
+    {
+      "id": "io.github.salemsayed.omaonedrive"
     }
   ],
-  "disabledPlugins": [
-    "omarchy.menu"
-  ],
-  "cloneSourceRestores": [
-    "viniabdalla.menu"
-  ]
+  "version": 1
 }

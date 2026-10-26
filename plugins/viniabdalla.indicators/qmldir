@@ -1,0 +1,2 @@
+singleton DictationState 1.0 DictationState.qml
+singleton ToggleState 1.0 ToggleState.qml

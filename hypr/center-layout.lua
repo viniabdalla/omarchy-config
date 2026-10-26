@@ -72,9 +72,10 @@ local function hub_width(ctx, mode)
   return hub_widths[key]
 end
 
-local function save_hub_width(id, mode, value)
+local function set_hub_width(id, mode, value, persist)
   local key = id .. "." .. mode
   hub_widths[key] = value
+  if persist == false then return end
   local file = io.open(state_dir .. key .. ".width", "w")
   if file then
     file:write(value, "\n")
@@ -82,7 +83,16 @@ local function save_hub_width(id, mode, value)
   end
 end
 
-local function resize_lane(ctx, mode, sides, selected, pixels)
+local function save_hub_width(id, mode, value)
+  set_hub_width(id, mode, value, true)
+end
+
+local function persist_hub_width(id, mode)
+  local value = hub_widths[id .. "." .. mode]
+  if value then set_hub_width(id, mode, value, true) end
+end
+
+local function resize_lane(ctx, mode, sides, selected, pixels, persist)
   local id = workspace_id(ctx)
   if not id or ctx.area.w <= 0 then return false end
 
@@ -101,7 +111,7 @@ local function resize_lane(ctx, mode, sides, selected, pixels)
   end
   local max_hub = math.min(MAX_HUB_WIDTH, 1 - side_count * MIN_COLUMN_WIDTH)
   local new_hub = math.max(MIN_HUB_WIDTH, math.min(max_hub, hub_width(ctx, mode) + delta))
-  save_hub_width(id, mode, new_hub)
+  set_hub_width(id, mode, new_hub, persist)
   return true
 end
 
@@ -182,6 +192,11 @@ hl.layout.register(name, {
     end
     if msg == "relayout" then return true end
     local address, amount = msg:match("^resize%-target%-px (%S+) ([+-]?%d+%.?%d*)$")
+    local persist = true
+    if not amount then
+      address, amount = msg:match("^resize%-target%-live%-px (%S+) ([+-]?%d+%.?%d*)$")
+      persist = false
+    end
     if amount then
       local id = workspace_id(ctx)
       local sides = id and window_sides[id .. "." .. name] or nil
@@ -190,7 +205,7 @@ hl.layout.register(name, {
         local side = target_side(ctx, name, address)
         if side then info = { side = side, column = 1, columns = 1 } end
       end
-      if info then return resize_lane(ctx, name, sides, info, tonumber(amount)) end
+      if info then return resize_lane(ctx, name, sides, info, tonumber(amount), persist) end
       return false
     end
     local pixels = tonumber(msg:match("^resize%-hub%-px ([+-]?%d+%.?%d*)$"))
@@ -367,42 +382,149 @@ hl.layout.register("saved", {
 
 -- Restore each workspace's selected mode after a config reload.
 center_mode_rules = {}
-for _, ws in ipairs(hl.get_workspaces()) do
-  local file = io.open(state_dir .. tostring(ws.id) .. ".mode", "r")
-  if file then
-    local mode = file:read("*l")
-    file:close()
-    if mode == "center" or mode == "focus-left" or mode == "saved" then
-      center_mode_rules[tostring(ws.id)] = hl.workspace_rule({
-        workspace = tostring(ws.id), layout = "lua:" .. mode,
-      })
+local native_focus_timer
+
+-- The Focus mode saved for a workspace ("center", "focus-left") or nil.
+local function saved_mode(id)
+  local file = io.open(state_dir .. tostring(id) .. ".mode", "r")
+  local mode = file and file:read("*l") or nil
+  if file then file:close() end
+  if mode == "center" or mode == "focus-left" then return mode end
+end
+
+local function window_on_workspace(address, id)
+  for _, window in ipairs(hl.get_windows()) do
+    if norm(window.address) == norm(address) then
+      return window.workspace ~= nil and tostring(window.workspace.id) == id
+    end
+  end
+  return false
+end
+
+local function native_focus_mode(layout)
+  if layout == "lua:center" or layout == "center" then return "center" end
+  if layout == "lua:focus-left" or layout == "focus-left" then return "focus-left" end
+end
+
+local function native_focus_rule(id, mode)
+  return hl.workspace_rule({
+    workspace = id,
+    layout = "master",
+    layout_opts = { orientation = mode == "center" and "center" or "left" },
+  })
+end
+
+local function saved_width(id, mode)
+  local key = id .. "." .. mode
+  if hub_widths[key] then return hub_widths[key] end
+  local file = io.open(state_dir .. key .. ".width", "r")
+  local value = file and tonumber(file:read("*l")) or nil
+  if file then file:close() end
+  return clamp_width(value or default_hub_width(mode))
+end
+
+-- Workspace rules change the layout property asynchronously. Apply the parts
+-- that belong to the native master instance just after that property lands.
+local function apply_native_focus(id, mode)
+  local ws = hl.get_active_workspace()
+  if not ws or tostring(ws.id) ~= id then return end
+  hl.dispatch(hl.dsp.layout(string.format("mfact exact %.6f", saved_width(id, mode))))
+
+  local file = io.open(state_dir .. id .. ".hub", "r")
+  local hub = file and file:read("*l") or nil
+  if file then file:close() end
+  -- A stale hub, or one on another monitor's workspace, would move focus there.
+  if not hub or hub == "" or not window_on_workspace(hub, id) then return end
+  local active = hl.get_active_window()
+  local previous = active and active.address or nil
+  hl.dispatch(hl.dsp.focus({ window = "address:" .. hub }))
+  hl.dispatch(hl.dsp.layout("swapwithmaster master ignoremaster"))
+  if previous and norm(previous) ~= norm(hub) then
+    hl.dispatch(hl.dsp.focus({ window = "address:" .. previous }))
+  end
+end
+
+local function schedule_native_focus(id, mode)
+  if native_focus_timer then native_focus_timer:set_enabled(false) end
+  native_focus_timer = hl.timer(function()
+    native_focus_timer = nil
+    apply_native_focus(id, mode)
+  end, { timeout = 25, type = "oneshot" })
+end
+
+-- Hyprland 0.56's Lua layout removeTarget drops its fullscreen handler without
+-- clearing the other windows' fullscreen alpha/input block. Native dwindle
+-- explicitly exits fullscreen here. Do the same BEFORE replacing either rule.
+function center_mode_set_layout(workspace, layout)
+  local id = tostring(workspace)
+  for _, window in ipairs(hl.get_windows()) do
+    if window.workspace and tostring(window.workspace.id) == id and window.fullscreen ~= 0 then
+      hl.dispatch(hl.dsp.window.fullscreen_state({
+        window = "address:" .. window.address, internal = 0, client = 0, action = "set",
+      }))
+    end
+  end
+  if center_mode_rules[id] then center_mode_rules[id]:set_enabled(false) end
+  local mode = native_focus_mode(layout)
+  if mode then
+    hl.config({ master = { smart_resizing = true } })
+    center_mode_rules[id] = native_focus_rule(id, mode)
+    schedule_native_focus(id, mode)
+  else
+    center_mode_rules[id] = hl.workspace_rule({ workspace = id, layout = layout })
+  end
+end
+
+-- Config reload unregisters Lua layouts before user Lua runs, so it cannot use
+-- the safe setter above. Reconcile only orphaned fullscreen visibility: never
+-- touch a workspace with real fullscreen, hidden/grouped windows, or app alpha.
+function center_mode_repair_fullscreen()
+  local windows = hl.get_windows()
+  for _, workspace in ipairs(hl.get_workspaces()) do
+    if not workspace.has_fullscreen then
+      for _, window in ipairs(windows) do
+        if window.workspace and window.workspace.id == workspace.id
+          and window.mapped and not window.hidden and not window.pinned
+          and window.visible == false and window.accepts_input == false
+          and window.allowed_over_fullscreen == false
+          and window.fullscreen == 0 and window.fullscreen_client == 0 then
+          -- A zero -> zero request is a no-op in the controller. A complete
+          -- transition is needed to restore both alpha and input-block state.
+          for _, mode in ipairs({ 2, 0 }) do
+            hl.dispatch(hl.dsp.window.fullscreen_state({
+              window = "address:" .. window.address, internal = mode, client = mode,
+              action = "set", layout_aware = false,
+            }))
+          end
+          break
+        end
+      end
     end
   end
 end
 
-local pointer_timer
-local previous_no_warps
+if type(hl.on) == "function" then
+  hl.on("config.reloaded", center_mode_repair_fullscreen)
+end
 
--- Suppress pointer warping only while this shortcut swaps the main window.
-function center_mode_cycle_window()
-  local ws = hl.get_active_workspace()
-  if not ws then return end
-  if ws.tiled_layout ~= "lua:center" and ws.tiled_layout ~= "lua:focus-left" then
-    hl.dispatch(hl.dsp.window.cycle_next())
-    return
+-- Omarchy's keybindings scanner provides a placeholder hl table without APIs.
+if type(hl.get_workspaces) == "function" then
+  local active = hl.get_active_workspace()
+  for _, ws in ipairs(hl.get_workspaces()) do
+    local mode = saved_mode(ws.id)
+    -- A workspace showing a saved layout comes back on its Lua layout, not on master.
+    local state = io.open(state_dir .. tostring(ws.id) .. ".mode", "r")
+    local saved_layout = state and state:read("*l") == "saved"
+    if state then state:close() end
+    if saved_layout then
+      center_mode_rules[tostring(ws.id)] = hl.workspace_rule({ workspace = tostring(ws.id), layout = "lua:saved" })
+    elseif mode then
+      local id = tostring(ws.id)
+      hl.config({ master = { smart_resizing = true } })
+      center_mode_rules[id] = native_focus_rule(id, mode)
+      if active and ws.id == active.id then schedule_native_focus(id, mode) end
+    end
   end
-  if previous_no_warps == nil then
-    previous_no_warps = hl.get_config("cursor:no_warps")
-  end
-  hl.config({ cursor = { no_warps = true } })
-  local ok, err = pcall(function() hl.dispatch(hl.dsp.layout("cycle-hub")) end)
-  if pointer_timer then pointer_timer:set_enabled(false) end
-  pointer_timer = hl.timer(function()
-    hl.config({ cursor = { no_warps = previous_no_warps } })
-    previous_no_warps = nil
-    pointer_timer = nil
-  end, { timeout = 250, type = "oneshot" })
-  if not ok then error(err) end
 end
 
 local function active_center_workspace()
@@ -410,6 +532,7 @@ local function active_center_workspace()
   if ws and (ws.tiled_layout == "lua:center" or ws.tiled_layout == "lua:focus-left") then
     return ws
   end
+  if ws and ws.tiled_layout == "master" and saved_mode(ws.id) then return ws end
 end
 
 local function current_mode(ws)
@@ -418,6 +541,30 @@ local function current_mode(ws)
   local mode = file:read("*l")
   file:close()
   return mode
+end
+
+function center_mode_set_width(value)
+  local ws = active_center_workspace()
+  if not ws then return end
+  local mode = current_mode(ws)
+  value = clamp_width(tonumber(value) or default_hub_width(mode))
+  save_hub_width(tostring(ws.id), mode, value)
+  if ws.tiled_layout == "master" then
+    hl.dispatch(hl.dsp.layout(string.format("mfact exact %.6f", value)))
+  else
+    hl.dispatch(hl.dsp.layout(string.format("set-hub-width %.6f", value)))
+  end
+end
+
+function center_mode_make_main(address)
+  local ws = active_center_workspace()
+  if not ws then return end
+  if ws.tiled_layout == "master" then
+    hl.dispatch(hl.dsp.focus({ window = "address:" .. address }))
+    hl.dispatch(hl.dsp.layout("swapwithmaster master ignoremaster"))
+  else
+    hl.dispatch(hl.dsp.layout("relayout"))
+  end
 end
 
 function center_mode_resize_by(pixels, tiled_pixels)
@@ -452,8 +599,201 @@ end
 
 local resize_drag
 local resize_timer
+local BORDER_GRAB_AREA = 12
+
+local function window_contains(window, point)
+  local at, size = window.at, window.size
+  return at and size and point
+    and point.x >= at.x and point.x < at.x + size.x
+    and point.y >= at.y and point.y < at.y + size.y
+end
+
+local function resize_target_at_cursor(ws, mode, cursor)
+  local sides = window_sides[tostring(ws.id) .. "." .. mode] or {}
+  for _, window in ipairs(hl.get_windows()) do
+    if window.workspace and window.workspace.id == ws.id
+      and window.mapped and not window.hidden and window.visible ~= false
+      and window_contains(window, cursor) then
+      if window.floating then return nil, true end
+      local info = sides[norm(window.address)]
+      if info then
+        return { address = window.address, side = info.side }, false
+      end
+    end
+  end
+  return nil, false
+end
+
+local function resize_hub_border_at_cursor(ws, mode, cursor)
+  local sides = window_sides[tostring(ws.id) .. "." .. mode] or {}
+  local windows = hl.get_windows()
+
+  -- A panel or another floating window on top of the border owns this click.
+  for _, window in ipairs(windows) do
+    if window.workspace and window.workspace.id == ws.id
+      and window.floating and window.mapped and not window.hidden
+      and window.visible ~= false and window_contains(window, cursor) then
+      return nil
+    end
+  end
+
+  for _, window in ipairs(windows) do
+    local info = sides[norm(window.address)]
+    local at, size = window.at, window.size
+    if info and info.side == "hub" and at and size
+      and window.workspace and window.workspace.id == ws.id
+      and window.mapped and not window.hidden and window.visible ~= false
+      and cursor.y >= at.y - BORDER_GRAB_AREA
+      and cursor.y <= at.y + size.y + BORDER_GRAB_AREA then
+      local left = math.abs(cursor.x - at.x)
+      local right = math.abs(cursor.x - (at.x + size.x))
+      if left <= BORDER_GRAB_AREA or right <= BORDER_GRAB_AREA then
+        return {
+          address = window.address,
+          side = "hub",
+          growth_factor = left <= right and -1 or 1,
+        }
+      end
+    end
+  end
+end
+
+-- Native master keeps mfact to itself, so the width is read back from the
+-- tiled geometry. Snapshot it when a press may start a native resize; on
+-- release, save only if the geometry actually changed. A plain click, a lone
+-- window or fullscreen never rewrites the stored width.
+local native_resize_snapshot
+
+local function native_tiled(ws)
+  local tiled, signature = {}, {}
+  for _, window in ipairs(hl.get_windows()) do
+    if window.workspace and window.workspace.id == ws.id and not window.floating
+      and window.mapped and not window.hidden and window.at and window.size then
+      if (window.fullscreen or 0) ~= 0 then return nil end
+      tiled[#tiled + 1] = window
+      signature[#signature + 1] = string.format("%s:%d,%d", norm(window.address), window.at.x, window.size.x)
+    end
+  end
+  table.sort(signature)
+  return tiled, table.concat(signature, " ")
+end
+
+local function start_native_resize(ws)
+  local tiled, signature = native_tiled(ws)
+  native_resize_snapshot = tiled and #tiled >= 2
+    and { workspace = ws.id, signature = signature } or nil
+end
+
+-- Orientation left keeps the master on the left edge. Orientation center puts
+-- it between the stacks once there are two of them, otherwise on the left.
+-- Returns the master window and the span of the tiled area.
+local function native_master(tiled, mode)
+  local left, right
+  for _, window in ipairs(tiled) do
+    left = math.min(left or window.at.x, window.at.x)
+    right = math.max(right or (window.at.x + window.size.x), window.at.x + window.size.x)
+  end
+  if not left or right <= left then return nil end
+  local master
+  for _, window in ipairs(tiled) do
+    local inner = window.at.x > left + 2 and window.at.x + window.size.x < right - 2
+    if mode == "center" and inner then master = window; break end
+    if window.at.x <= left + 2 and not master then master = window end
+  end
+  return master, right - left
+end
+
+local function native_master_ratio(tiled, mode)
+  local master, span = native_master(tiled, mode)
+  return master and master.size.x / span
+end
+
+local function persist_native_width()
+  local snapshot = native_resize_snapshot
+  native_resize_snapshot = nil
+  local ws = active_center_workspace()
+  if not snapshot or not ws or ws.tiled_layout ~= "master" or ws.id ~= snapshot.workspace then return end
+  local tiled, signature = native_tiled(ws)
+  if not tiled or #tiled < 2 or signature == snapshot.signature then return end
+  local mode = current_mode(ws)
+  local ratio = native_master_ratio(tiled, mode)
+  if ratio then save_hub_width(tostring(ws.id), mode, clamp_width(ratio)) end
+end
+
+-- Tiled window under the cursor on a visible workspace. nil when the cursor is
+-- over a floating window, a bar or a gap.
+local function tiled_window_at_cursor()
+  local cursor = hl.get_cursor_pos()
+  if not cursor then return nil end
+  local found
+  for _, window in ipairs(hl.get_windows()) do
+    if window.workspace and window.workspace.visible ~= false and window.mapped ~= false
+      and not window.hidden and window_contains(window, cursor) then
+      if window.floating then return nil end
+      found = found or window
+    end
+  end
+  return found
+end
+
+-- Native Focus: a side window under the cursor trades places with the master
+-- and keeps focus; over the master (or nowhere), the stack rolls as before.
+local function native_cycle(ws, hovered)
+  if hovered and tostring(hovered.workspace.id) == tostring(ws.id) then
+    local tiled = native_tiled(ws)
+    local master = tiled and native_master(tiled, saved_mode(ws.id))
+    if master and norm(master.address) ~= norm(hovered.address) then
+      hl.dispatch(hl.dsp.focus({ window = "address:" .. hovered.address }))
+      hl.dispatch(hl.dsp.layout("swapwithmaster master ignoremaster"))
+      local file = io.open(state_dir .. tostring(ws.id) .. ".hub", "w")
+      if file then file:write(hovered.address, "\n"); file:close() end
+      return
+    end
+    local active = hl.get_active_window()
+    if not active or norm(active.address) ~= norm(hovered.address) then
+      hl.dispatch(hl.dsp.focus({ window = "address:" .. hovered.address }))
+    end
+  end
+  hl.dispatch(hl.dsp.layout("rollnext"))
+end
+
+local pointer_timer
+local previous_no_warps
+
+-- Suppress pointer warping only while this shortcut swaps the main window.
+function center_mode_cycle_window()
+  local ws = hl.get_active_workspace()
+  -- A mouse shortcut acts on the workspace under the cursor, even when focus
+  -- is still on the other monitor.
+  local hovered = tiled_window_at_cursor()
+  if hovered and hovered.workspace.tiled_layout == "master" and saved_mode(hovered.workspace.id) then
+    ws = hovered.workspace
+  end
+  if not ws then return end
+  local native_focus = ws.tiled_layout == "master" and saved_mode(ws.id) ~= nil
+  -- Only Focus layouts have a main window; in Tiled the shortcut does nothing.
+  if ws.tiled_layout ~= "lua:center" and ws.tiled_layout ~= "lua:focus-left" and not native_focus then
+    return
+  end
+  if previous_no_warps == nil then
+    previous_no_warps = hl.get_config("cursor:no_warps")
+  end
+  hl.config({ cursor = { no_warps = true } })
+  local ok, err = pcall(function()
+    if native_focus then native_cycle(ws, hovered) else hl.dispatch(hl.dsp.layout("cycle-hub")) end
+  end)
+  if pointer_timer then pointer_timer:set_enabled(false) end
+  pointer_timer = hl.timer(function()
+    hl.config({ cursor = { no_warps = previous_no_warps } })
+    previous_no_warps = nil
+    pointer_timer = nil
+  end, { timeout = 250, type = "oneshot" })
+  if not ok then error(err) end
+end
 
 function center_mode_resize_mouse_stop()
+  if resize_drag then persist_hub_width(resize_drag.workspace, resize_drag.mode) end
+  persist_native_width()
   if resize_timer then resize_timer:set_enabled(false) end
   resize_timer = nil
   resize_drag = nil
@@ -466,15 +806,30 @@ function center_mode_resize_mouse_start()
     hl.dispatch(hl.dsp.window.resize())
     return
   end
-  local active = hl.get_active_window()
-  if not active then return end
+  if ws.tiled_layout == "master" then
+    start_native_resize(ws)
+    hl.dispatch(hl.dsp.window.resize())
+    return
+  end
   local mode = current_mode(ws)
-  local sides = window_sides[tostring(ws.id) .. "." .. mode] or {}
-  local info = sides[norm(active.address)]
-  if not info then return end
   local cursor = hl.get_cursor_pos()
   if not cursor then return end
-  resize_drag = { workspace = tostring(ws.id), mode = mode, address = active.address, side = info.side, x = cursor.x }
+  local selected, floating = resize_target_at_cursor(ws, mode, cursor)
+  if floating then
+    hl.dispatch(hl.dsp.window.resize())
+    return
+  end
+  if not selected then
+    local active = hl.get_active_window()
+    local sides = window_sides[tostring(ws.id) .. "." .. mode] or {}
+    local info = active and sides[norm(active.address)] or nil
+    if not info then return end
+    selected = { address = active.address, side = info.side }
+  end
+  resize_drag = {
+    workspace = tostring(ws.id), mode = mode, address = selected.address,
+    side = selected.side, growth_factor = selected.growth_factor, x = cursor.x,
+  }
   resize_timer = hl.timer(function()
     local active = active_center_workspace()
     if not resize_drag or not active or tostring(active.id) ~= resize_drag.workspace or current_mode(active) ~= resize_drag.mode then
@@ -487,9 +842,48 @@ function center_mode_resize_mouse_start()
     if math.abs(delta) < 1 then return end
     delta = math.floor(math.abs(delta)) * (delta < 0 and -1 or 1)
     resize_drag.x = resize_drag.x + delta
-    local growth = resize_drag.side == "right" and -delta or delta
-    hl.dispatch(hl.dsp.layout("resize-target-px " .. resize_drag.address .. " " .. growth))
-  end, { timeout = 16, type = "repeat" })
+    local growth = resize_drag.growth_factor and delta * resize_drag.growth_factor
+      or (resize_drag.side == "right" and -delta or delta)
+    hl.dispatch(hl.dsp.layout("resize-target-live-px " .. resize_drag.address .. " " .. growth))
+  end, { timeout = 4, type = "repeat" })
+end
+
+-- Bare left-drag support for Lua layouts. Hyprland's resize_on_border detects
+-- the pointer shape, but its built-in resize dispatcher cannot resize a custom
+-- Lua layout. The non-consuming mouse bind calls this only as a border probe;
+-- clicks away from an adjustable vertical border keep going to the app.
+function center_mode_resize_border_start()
+  center_mode_resize_mouse_stop()
+  local ws = active_center_workspace()
+  if not ws then return end
+  -- Native master resizes borders itself; only note the geometry to compare.
+  if ws.tiled_layout == "master" then
+    start_native_resize(ws)
+    return
+  end
+  local mode = current_mode(ws)
+  local cursor = hl.get_cursor_pos()
+  if not cursor then return end
+  local selected = resize_hub_border_at_cursor(ws, mode, cursor)
+  if not selected then return end
+  resize_drag = {
+    workspace = tostring(ws.id), mode = mode, address = selected.address,
+    side = selected.side, growth_factor = selected.growth_factor, x = cursor.x,
+  }
+  resize_timer = hl.timer(function()
+    local active = active_center_workspace()
+    if not resize_drag or not active or tostring(active.id) ~= resize_drag.workspace or current_mode(active) ~= resize_drag.mode then
+      center_mode_resize_mouse_stop()
+      return
+    end
+    local now = hl.get_cursor_pos()
+    if not now then return end
+    local delta = now.x - resize_drag.x
+    if math.abs(delta) < 1 then return end
+    delta = math.floor(math.abs(delta)) * (delta < 0 and -1 or 1)
+    resize_drag.x = resize_drag.x + delta
+    hl.dispatch(hl.dsp.layout("resize-target-live-px " .. resize_drag.address .. " " .. (delta * resize_drag.growth_factor)))
+  end, { timeout = 4, type = "repeat" })
 end
 
 -- Shortcuts managed by omarchy-layout-manager ---------------------------------
